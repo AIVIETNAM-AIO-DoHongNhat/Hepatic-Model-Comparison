@@ -64,13 +64,16 @@ Hepatic-Model-Comparison/
 │   ├── 05_model_track_c.ipynb  # họ mô hình C: RF + XGBoost (dự kiến) ⬜
 │   ├── 06_statistics.ipynb     # kiểm định ý nghĩa (dự kiến)       ⬜
 │   └── 07_report_assets.ipynb  # hình/bảng cho báo cáo (dự kiến)   ⬜
-├── src/                # module dùng chung (import: from src import data, metrics, stats)
+├── src/                # module dùng chung (import: from src import data, metrics, stats, submission)
 │   ├── __init__.py     # đánh dấu package, re-export hằng số
 │   ├── data.py         # loaders + hằng số dùng chung                         ✅
 │   ├── metrics.py      # log_loss / accuracy / macro-F1 thống nhất            ✅
-│   └── stats.py        # kiểm định ghép cặp, CI, Bonferroni, calibration      ✅
+│   ├── stats.py        # kiểm định ghép cặp, CI, Bonferroni, calibration      ✅
+│   └── submission.py   # tạo file nộp bài đúng định dạng cuộc thi             ✅
 ├── eda_figures/        # hình EDA (theme sáng cho nghiên cứu)
 ├── results/            # điểm mô hình theo fold (scores_track_a/b/c.csv, scores_all.csv)
+├── tables/             # bảng số liệu cho báo cáo (xuất từ 07_report_assets.ipynb)
+├── submissions/        # file nộp Kaggle (ghi bởi src/submission.py, mặc định submission.csv)
 ├── report/             # báo cáo LaTeX (template AI CONQUER 2026)
 ├── dataset/            # notebook baseline tham khảo của cuộc thi
 ├── requirements.txt
@@ -137,12 +140,13 @@ Tầng thống kê (notebook 06, `src/stats.py`) là đóng góp nghiên cứu c
 
 ## 8. Sử dụng module dùng chung (`src/`)
 
-Ba module trong `src/` được viết dưới dạng **package** để notebook `03`–`06` dùng chung
-một cách load, một bộ chỉ số và một bộ fold — bảo đảm mọi mô hình được so sánh công bằng.
+Bốn module trong `src/` được viết dưới dạng **package** để notebook `03`–`06` dùng chung
+một cách load, một bộ chỉ số, một bộ fold và một cách nộp bài — bảo đảm mọi mô hình được
+so sánh công bằng.
 
-> **Import & môi trường:** luôn import bằng `from src import data, metrics, stats` (chạy từ
-> thư mục gốc dự án hoặc thêm gốc vào `sys.path`). Cần môi trường có `scikit-learn` để đọc các
-> encoder `.pkl` — chạy notebook bằng đúng env đã cài `requirements.txt`.
+> **Import & môi trường:** luôn import bằng `from src import data, metrics, stats, submission`
+> (chạy từ thư mục gốc dự án hoặc thêm gốc vào `sys.path`). Cần môi trường có `scikit-learn` để
+> đọc các encoder `.pkl` — chạy notebook bằng đúng env đã cài `requirements.txt`.
 
 **`data.py` — nạp dữ liệu + hằng số dùng chung**
 
@@ -169,6 +173,13 @@ Hằng số: `RANDOM_STATE=42`, `N_FOLDS=5`, `LABELS=[0,1,2]`, `LABEL_MAP`, `CLA
 - `ci_diff_t`, `ci_diff_bootstrap` — khoảng tin cậy cho chênh lệch trung bình (tham số & bootstrap)
 - `bonferroni_correction(pvalues, alpha)` — hiệu chỉnh so sánh bội
 - `brier_multiclass`, `expected_calibration_error`, `reliability_data` — kiểm tra calibration
+
+**`submission.py` — tạo file nộp bài thống nhất** (đúng định dạng `aio26_sample-submission.csv`)
+
+- `load_test_ids()` — cột `id` của test thô, căn khớp theo vị trí với `X_test` từ `load_processed()`
+- `make_submission(test_ids, y_proba, path=None)` — kiểm tra `y_proba` đủ 3 cột đúng thứ tự
+  `CLASS_ORDER` và mỗi hàng tổng xác suất ≈ 1, rồi ghi CSV `id, Status_C, Status_CL, Status_D`
+  (mặc định `submissions/submission.csv`; `path=False` để chỉ lấy DataFrame, không ghi file)
 
 **Ví dụ trong notebook mô hình (03/04/05):**
 ```python
@@ -200,12 +211,23 @@ print(stats.ci_diff_t(a, b))            # (mean_diff, low, high); không chứa 
 reject, p_adj = stats.bonferroni_correction([p1, p2, p3])
 ```
 
+**Ví dụ tạo file nộp bài:**
+```python
+from src import data, submission
+
+X_train, y_train, X_test = data.load_processed()
+model.fit(X_train, y_train)
+y_proba = model.predict_proba(X_test)  # cột theo thứ tự CLASS_ORDER = [C, CL, D]
+
+submission.make_submission(submission.load_test_ids(), y_proba)  # -> submissions/submission.csv
+```
+
 ## 9. Trạng thái & lộ trình
 
 - [x] Nạp và mô tả bộ dữ liệu
 - [x] Phân tích khám phá dữ liệu (5 hình)
 - [x] Pipeline tiền xử lý `raw → interim → processed`
-- [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`)
+- [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`, `submission.py`)
 - [ ] Mô hình track A
 - [ ] Mô hình track B
 - [ ] Mô hình track C (Random Forest + XGBoost)
