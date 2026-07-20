@@ -9,7 +9,7 @@ Importing the package eagerly loads the three submodules and re-exports the
 constants most code needs, so callers can use e.g. ``src.LABELS`` directly.
 """
 
-from . import data, metrics, stats
+from . import data, metrics, stats, submission
 
 # Re-export the shared constants defined in data.py for convenience.
 from .data import (
@@ -24,6 +24,7 @@ __all__ = [
     "data",
     "metrics",
     "stats",
+    "submission",
     "RANDOM_STATE",
     "N_FOLDS",
     "TARGET_COL",
