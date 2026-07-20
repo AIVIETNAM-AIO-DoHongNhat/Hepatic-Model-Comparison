@@ -61,14 +61,16 @@ Hepatic-Model-Comparison/
 │   ├── 02_preprocesing.ipynb   # pipeline raw → interim → processed ✅
 │   ├── 03_model_track_a.ipynb  # họ mô hình A (dự kiến)            ⬜
 │   ├── 04_model_track_b.ipynb  # họ mô hình B (dự kiến)            ⬜
-│   ├── 05_statistics.ipynb     # kiểm định ý nghĩa (dự kiến)       ⬜
-│   └── 06_report_assets.ipynb  # hình/bảng cho báo cáo (dự kiến)   ⬜
-├── src/
-│   ├── data.py         # hàm load + làm sạch dùng chung  (cần viết)
-│   ├── metrics.py      # log_loss / accuracy / f1 thống nhất (cần viết)
-│   └── stats.py        # kiểm định ghép cặp, CI, Bonferroni, calibration (cần viết)
+│   ├── 05_model_track_c.ipynb  # họ mô hình C: RF + XGBoost (dự kiến) ⬜
+│   ├── 06_statistics.ipynb     # kiểm định ý nghĩa (dự kiến)       ⬜
+│   └── 07_report_assets.ipynb  # hình/bảng cho báo cáo (dự kiến)   ⬜
+├── src/                # module dùng chung (import: from src import data, metrics, stats)
+│   ├── __init__.py     # đánh dấu package, re-export hằng số
+│   ├── data.py         # loaders + hằng số dùng chung                         ✅
+│   ├── metrics.py      # log_loss / accuracy / macro-F1 thống nhất            ✅
+│   └── stats.py        # kiểm định ghép cặp, CI, Bonferroni, calibration      ✅
 ├── eda_figures/        # hình EDA (theme sáng cho nghiên cứu)
-├── results/            # điểm mô hình theo fold (scores_track_a/b.csv, scores_all.csv)
+├── results/            # điểm mô hình theo fold (scores_track_a/b/c.csv, scores_all.csv)
 ├── report/             # báo cáo LaTeX (template AI CONQUER 2026)
 ├── dataset/            # notebook baseline tham khảo của cuộc thi
 ├── requirements.txt
@@ -119,13 +121,13 @@ jupyter lab
 ```
 1. `01_eda.ipynb` - phân tích khám phá, tạo lại `eda_figures/`.
 2. `02_preprocesing.ipynb` - dựng `data/interim/` và `data/processed/`.
-3. `03_model_track_a.ipynb` / `04_model_track_b.ipynb` - huấn luyện các họ mô hình, ghi `results/scores_track_*.csv`.
-4. `05_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
-5. `06_report_assets.ipynb` - xuất hình/bảng cuối cho báo cáo.
+3. `03_model_track_a.ipynb` / `04_model_track_b.ipynb` / `05_model_track_c.ipynb` - huấn luyện các họ mô hình (track C: Random Forest + XGBoost), ghi `results/scores_track_*.csv`.
+4. `06_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
+5. `07_report_assets.ipynb` - xuất hình/bảng cuối cho báo cáo.
 
 ## 7. Phương pháp luận - so sánh mô hình
 
-Tầng thống kê (notebook 05, `src/stats.py`) là đóng góp nghiên cứu cốt lõi:
+Tầng thống kê (notebook 06, `src/stats.py`) là đóng góp nghiên cứu cốt lõi:
 - **Chỉ số thống nhất** tính giống hệt nhau cho mọi mô hình (`src/metrics.py`) - log loss, accuracy, macro-F1.
 - **Dùng chung fold** để điểm theo fold được ghép cặp giữa các mô hình.
 - **Kiểm định ghép cặp** (ví dụ paired *t*-test / Wilcoxon) trên chênh lệch theo từng fold.
@@ -133,24 +135,80 @@ Tầng thống kê (notebook 05, `src/stats.py`) là đóng góp nghiên cứu c
 - **Hiệu chỉnh so sánh bội** (Bonferroni) khi so nhiều mô hình cùng lúc.
 - **Kiểm tra calibration**, vì chỉ số log loss thưởng cho xác suất được hiệu chỉnh tốt.
 
-## 8. Trạng thái & lộ trình
+## 8. Sử dụng module dùng chung (`src/`)
+
+Ba module trong `src/` được viết dưới dạng **package** để notebook `03`–`06` dùng chung
+một cách load, một bộ chỉ số và một bộ fold — bảo đảm mọi mô hình được so sánh công bằng.
+
+> **Import & môi trường:** luôn import bằng `from src import data, metrics, stats` (chạy từ
+> thư mục gốc dự án hoặc thêm gốc vào `sys.path`). Cần môi trường có `scikit-learn` để đọc các
+> encoder `.pkl` — chạy notebook bằng đúng env đã cài `requirements.txt`.
+
+**`data.py` — nạp dữ liệu + hằng số dùng chung**
+
+| Hàm | Trả về |
+|-----|--------|
+| `load_processed()` | `(X_train, y_train, X_test)` — đặc trưng đã sẵn sàng, `y` mã hóa `{C:0, CL:1, D:2}` |
+| `load_folds()` | Series `fold_id` (0–4), căn khớp theo vị trí với `X_train` |
+| `iter_folds(fold_id)` | sinh `(fold, train_idx, valid_idx)` — chỉ số dùng với `.iloc` |
+| `load_feature_list()` | danh sách 31 tên cột đặc trưng |
+| `load_transformers()` | dict `{label_encoder, cat_encoder, scaler}` đã fit |
+| `load_raw()` | `(train_df, test_df)` CSV gốc |
+
+Hằng số: `RANDOM_STATE=42`, `N_FOLDS=5`, `LABELS=[0,1,2]`, `LABEL_MAP`, `CLASS_ORDER`.
+
+**`metrics.py` — chỉ số thống nhất** (luôn dùng `labels=[0,1,2]` để không lỗi khi fold thiếu lớp hiếm `CL`)
+
+- `compute_metrics(y_true, y_proba)` → `{'log_loss', 'accuracy', 'macro_f1'}`
+- `score_cv(model_name, fold_ids, y_true_per_fold, y_proba_per_fold)` → DataFrame điểm theo fold
+- `summarize_scores(scores)` → trung bình ± độ lệch chuẩn mỗi chỉ số theo mô hình
+
+**`stats.py` — tầng thống kê** (điểm theo fold đã ghép cặp; với log loss thì nhỏ hơn = tốt hơn)
+
+- `paired_ttest`, `wilcoxon_test` — kiểm định ghép cặp trên chênh lệch theo fold
+- `ci_diff_t`, `ci_diff_bootstrap` — khoảng tin cậy cho chênh lệch trung bình (tham số & bootstrap)
+- `bonferroni_correction(pvalues, alpha)` — hiệu chỉnh so sánh bội
+- `brier_multiclass`, `expected_calibration_error`, `reliability_data` — kiểm tra calibration
+
+**Ví dụ trong notebook mô hình (03/04/05):**
+```python
+import pandas as pd
+from sklearn.linear_model import LogisticRegression
+from src import data, metrics
+
+X, y, _ = data.load_processed()
+fold = data.load_folds()
+
+rows = []
+for f, tr, va in data.iter_folds(fold):
+    model = LogisticRegression(max_iter=5000).fit(X.iloc[tr], y.iloc[tr])
+    proba = model.predict_proba(X.iloc[va])
+    rows.append({"model": "track_a", "fold": f, **metrics.compute_metrics(y.iloc[va], proba)})
+
+scores = pd.DataFrame(rows)
+scores.to_csv("results/scores_track_a.csv", index=False)
+```
+
+**Ví dụ trong notebook thống kê (06):**
+```python
+from src import stats
+
+a = scores_track_a["log_loss"].values   # đã ghép cặp theo fold
+b = scores_track_b["log_loss"].values
+print(stats.paired_ttest(a, b))         # (t, p)
+print(stats.ci_diff_t(a, b))            # (mean_diff, low, high); không chứa 0 => có ý nghĩa
+reject, p_adj = stats.bonferroni_correction([p1, p2, p3])
+```
+
+## 9. Trạng thái & lộ trình
 
 - [x] Nạp và mô tả bộ dữ liệu
 - [x] Phân tích khám phá dữ liệu (5 hình)
 - [x] Pipeline tiền xử lý `raw → interim → processed`
-- [ ] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`)
+- [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`)
 - [ ] Mô hình track A
 - [ ] Mô hình track B
+- [ ] Mô hình track C (Random Forest + XGBoost)
 - [ ] Phân tích ý nghĩa thống kê
 - [ ] Hình/bảng báo cáo + báo cáo LaTeX cuối
 - [ ] File nộp Kaggle
-
-## 9. Công nghệ sử dụng
-
-`pandas` · `numpy` · `scikit-learn` · `scipy` · `matplotlib` · `seaborn`
-(xem [`requirements.txt`](requirements.txt) để biết phiên bản tối thiểu đã ghim).
-
-## 10. Lời cảm ơn
-
-Thực hiện cho **AI CONQUER 2026 (AIO26)**, AI VIET NAM. Bộ dữ liệu © ban tổ chức cuộc thi;
-sử dụng theo điều khoản của cuộc thi và không phân phối lại.
