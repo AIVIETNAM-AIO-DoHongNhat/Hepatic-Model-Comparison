@@ -43,7 +43,7 @@ Do ban tổ chức cung cấp (không đưa vào quản lý phiên bản - xem [
 xét nghiệm (`Bilirubin_Level`, `Albumin_Level`, `Copper_Level`, `AST_Level`, `Platelet_Count`,
 `Prothrombin_Time`, …).
 
-Các phát hiện chính từ EDA (xem [`eda_figures/`](eda_figures/)):
+Các phát hiện chính từ EDA (xem [`figures/eda/`](figures/eda/)):
 - `Edema_Status` thiếu ~92%, `Cholesterol`/`Triglyceride` ~55%, và 7 chỉ số xét nghiệm cùng thiếu ~43%.
 - Nhiều đặc trưng xét nghiệm lệch phải mạnh → cần biến đổi `log1p`.
 - Không có drift phân phối đáng kể giữa train/test → cross-validation tiêu chuẩn là an toàn.
@@ -57,20 +57,21 @@ Hepatic-Model-Comparison/
 │   ├── interim/        # đã làm sạch + impute + cờ missing + fold_id
 │   └── processed/      # đã encode + log-transform + scale; X / y / encoders
 ├── notebooks/
-│   ├── 01_eda.ipynb            # phân tích khám phá dữ liệu       ✅
-│   ├── 02_preprocesing.ipynb   # pipeline raw → interim → processed ✅
-│   ├── 03_model_track_a.ipynb  # họ mô hình A (dự kiến)            ⬜
-│   ├── 04_model_track_b.ipynb  # họ mô hình B (dự kiến)            ⬜
-│   ├── 05_model_track_c.ipynb  # họ mô hình C: RF + XGBoost (dự kiến) ⬜
-│   ├── 06_statistics.ipynb     # kiểm định ý nghĩa (dự kiến)       ⬜
-│   └── 07_report_assets.ipynb  # hình/bảng cho báo cáo (dự kiến)   ⬜
+│   ├── 01_eda.ipynb              # phân tích khám phá dữ liệu       ✅
+│   ├── 02_preprocesing.ipynb     # pipeline raw → interim → processed ✅
+│   ├── 03_baseline_models.ipynb  # baseline nhanh 6 model (1 lần train/val), tham khảo ✅
+│   ├── 04_model_track_a.ipynb    # họ mô hình A (dự kiến)            ⬜
+│   ├── 05_model_track_b.ipynb    # họ mô hình B: Decision Tree + Naive Bayes ⬜
+│   ├── 06_model_track_c.ipynb    # họ mô hình C: RF + XGBoost (dự kiến) ⬜
+│   ├── 07_report_assets.ipynb    # hình/bảng cho báo cáo (dự kiến)   ⬜
+│   └── 08_statistics.ipynb       # kiểm định ý nghĩa (dự kiến)       ⬜
 ├── src/                # module dùng chung (import: from src import data, metrics, stats, submission)
 │   ├── __init__.py     # đánh dấu package, re-export hằng số
 │   ├── data.py         # loaders + hằng số dùng chung                         ✅
 │   ├── metrics.py      # log_loss / accuracy / macro-F1 thống nhất            ✅
 │   ├── stats.py        # kiểm định ghép cặp, CI, Bonferroni, calibration      ✅
 │   └── submission.py   # tạo file nộp bài đúng định dạng cuộc thi             ✅
-├── eda_figures/        # hình EDA (theme sáng cho nghiên cứu)
+├── figures/            # hình vẽ, mỗi track/notebook một thư mục con (eda/, model_track_b/, ...)
 ├── results/            # điểm mô hình theo fold (scores_track_a/b/c.csv, scores_all.csv)
 ├── tables/             # bảng số liệu cho báo cáo (xuất từ 07_report_assets.ipynb)
 ├── submissions/        # file nộp Kaggle (ghi bởi src/submission.py, mặc định submission.csv)
@@ -122,15 +123,16 @@ Chạy các notebook theo thứ tự từ thư mục `notebooks/` (đường d�
 ```bash
 jupyter lab
 ```
-1. `01_eda.ipynb` - phân tích khám phá, tạo lại `eda_figures/`.
+1. `01_eda.ipynb` - phân tích khám phá, tạo lại `figures/eda/`.
 2. `02_preprocesing.ipynb` - dựng `data/interim/` và `data/processed/`.
-3. `03_model_track_a.ipynb` / `04_model_track_b.ipynb` / `05_model_track_c.ipynb` - huấn luyện các họ mô hình (track C: Random Forest + XGBoost), ghi `results/scores_track_*.csv`.
-4. `06_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
+3. `03_baseline_models.ipynb` - baseline nhanh 6 model (1 lần train/val), tham khảo trước khi vào track chính thức.
+4. `04_model_track_a.ipynb` / `05_model_track_b.ipynb` / `06_model_track_c.ipynb` - huấn luyện các họ mô hình (track C: Random Forest + XGBoost), ghi `results/scores_track_*.csv`.
 5. `07_report_assets.ipynb` - xuất hình/bảng cuối cho báo cáo.
+6. `08_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
 
 ## 7. Phương pháp luận - so sánh mô hình
 
-Tầng thống kê (notebook 06, `src/stats.py`) là đóng góp nghiên cứu cốt lõi:
+Tầng thống kê (notebook 08, `src/stats.py`) là đóng góp nghiên cứu cốt lõi:
 - **Chỉ số thống nhất** tính giống hệt nhau cho mọi mô hình (`src/metrics.py`) - log loss, accuracy, macro-F1.
 - **Dùng chung fold** để điểm theo fold được ghép cặp giữa các mô hình.
 - **Kiểm định ghép cặp** (ví dụ paired *t*-test / Wilcoxon) trên chênh lệch theo từng fold.
@@ -140,9 +142,9 @@ Tầng thống kê (notebook 06, `src/stats.py`) là đóng góp nghiên cứu c
 
 ## 8. Sử dụng module dùng chung (`src/`)
 
-Bốn module trong `src/` được viết dưới dạng **package** để notebook `03`–`06` dùng chung
-một cách load, một bộ chỉ số, một bộ fold và một cách nộp bài — bảo đảm mọi mô hình được
-so sánh công bằng.
+Bốn module trong `src/` được viết dưới dạng **package** để các notebook mô hình (`04`, `05`,
+`06`) và notebook thống kê (`08`) dùng chung một cách load, một bộ chỉ số, một bộ fold và một
+cách nộp bài — bảo đảm mọi mô hình được so sánh công bằng.
 
 > **Import & môi trường:** luôn import bằng `from src import data, metrics, stats, submission`
 > (chạy từ thư mục gốc dự án hoặc thêm gốc vào `sys.path`). Cần môi trường có `scikit-learn` để
@@ -181,7 +183,7 @@ Hằng số: `RANDOM_STATE=42`, `N_FOLDS=5`, `LABELS=[0,1,2]`, `LABEL_MAP`, `CLA
   `CLASS_ORDER` và mỗi hàng tổng xác suất ≈ 1, rồi ghi CSV `id, Status_C, Status_CL, Status_D`
   (mặc định `submissions/submission.csv`; `path=False` để chỉ lấy DataFrame, không ghi file)
 
-**Ví dụ trong notebook mô hình (03/04/05):**
+**Ví dụ trong notebook mô hình (04/05/06):**
 ```python
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
@@ -200,7 +202,7 @@ scores = pd.DataFrame(rows)
 scores.to_csv("results/scores_track_a.csv", index=False)
 ```
 
-**Ví dụ trong notebook thống kê (06):**
+**Ví dụ trong notebook thống kê (08):**
 ```python
 from src import stats
 
