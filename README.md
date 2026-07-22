@@ -153,19 +153,26 @@ so sánh công bằng.
 | Hàm | Trả về |
 |-----|--------|
 | `load_processed()` | `(X_train, y_train, X_test)` — đặc trưng đã sẵn sàng, `y` mã hóa `{C:0, CL:1, D:2}` |
-| `load_folds()` | Series `fold_id` (0–4), căn khớp theo vị trí với `X_train` |
+| `load_folds()` | Series `fold_id` (0–9), căn khớp theo vị trí với `X_train` |
 | `iter_folds(fold_id)` | sinh `(fold, train_idx, valid_idx)` — chỉ số dùng với `.iloc` |
 | `load_feature_list()` | danh sách 31 tên cột đặc trưng |
 | `load_transformers()` | dict `{label_encoder, cat_encoder, scaler}` đã fit |
 | `load_raw()` | `(train_df, test_df)` CSV gốc |
 
-Hằng số: `RANDOM_STATE=42`, `N_FOLDS=5`, `LABELS=[0,1,2]`, `LABEL_MAP`, `CLASS_ORDER`.
+Hằng số: `RANDOM_STATE=42`, `N_FOLDS=10`, `LABELS=[0,1,2]`, `LABEL_MAP`, `CLASS_ORDER`.
 
 **`metrics.py` — chỉ số thống nhất** (luôn dùng `labels=[0,1,2]` để không lỗi khi fold thiếu lớp hiếm `CL`)
 
 - `compute_metrics(y_true, y_proba)` → `{'log_loss', 'accuracy', 'macro_f1'}`
 - `score_cv(model_name, fold_ids, y_true_per_fold, y_proba_per_fold)` → DataFrame điểm theo fold
 - `summarize_scores(scores)` → trung bình ± độ lệch chuẩn mỗi chỉ số theo mô hình
+
+**`model_track_a.py` — pipeline KNN + Logistic Regression chống leakage**
+
+- `build_knn_pipeline()` / `build_logreg_pipeline()` — feature engineering, impute, encode và scale được fit bên trong từng fold.
+- `evaluate_track_a()` — nested CV: outer 10-fold dùng chung, inner 3-fold tuning nhẹ theo log loss.
+- `run_scaling_ablation()` — so sánh KNN `k=5` có/không `RobustScaler` trên cùng fold.
+- Chạy tái lập từ thư mục gốc bằng `python -m src.model_track_a`; kết quả được ghi vào `results/` và `tables/`.
 
 **`stats.py` — tầng thống kê** (điểm theo fold đã ghép cặp; với log loss thì nhỏ hơn = tốt hơn)
 
@@ -227,8 +234,8 @@ submission.make_submission(submission.load_test_ids(), y_proba)  # -> submission
 - [x] Nạp và mô tả bộ dữ liệu
 - [x] Phân tích khám phá dữ liệu (5 hình)
 - [x] Pipeline tiền xử lý `raw → interim → processed`
-- [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`, `submission.py`)
-- [ ] Mô hình track A
+- [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`, `submission.py`, `model_track_a.py`)
+- [x] Mô hình track A (KNN + Logistic Regression, nested 10-fold CV, ablation scaling)
 - [ ] Mô hình track B
 - [ ] Mô hình track C (Random Forest + XGBoost)
 - [ ] Phân tích ý nghĩa thống kê

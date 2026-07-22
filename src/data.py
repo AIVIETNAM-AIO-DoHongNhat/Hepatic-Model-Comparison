@@ -11,7 +11,7 @@ INTERIM_DIR = DATA_DIR / "interim"
 PROC_DIR    = DATA_DIR / "processed"
 
 RANDOM_STATE = 42
-N_FOLDS      = 5
+N_FOLDS      = 10
 TARGET_COL   = "Status"
 CLASS_ORDER  = ["C", "CL", "D"] # thứ tự cột xác suất
 LABELS       = [0, 1, 2] # dùng cho log_loss/f1_score

@@ -1,0 +1,21 @@
+model,outer_fold,best_params,inner_log_loss
+KNN,0,"{""model__n_neighbors"": 31}",0.8273625826149936
+Logistic_Regression,0,"{""model__C"": 1.0}",0.43843596695522113
+KNN,1,"{""model__n_neighbors"": 31}",0.7851052727599802
+Logistic_Regression,1,"{""model__C"": 1.0}",0.4408107409823647
+KNN,2,"{""model__n_neighbors"": 31}",0.7938010875986974
+Logistic_Regression,2,"{""model__C"": 1.0}",0.44125780846489304
+KNN,3,"{""model__n_neighbors"": 31}",0.7939125498278942
+Logistic_Regression,3,"{""model__C"": 1.0}",0.4423560050855879
+KNN,4,"{""model__n_neighbors"": 31}",0.7967453540541422
+Logistic_Regression,4,"{""model__C"": 1.0}",0.44213325239128354
+KNN,5,"{""model__n_neighbors"": 31}",0.7692118060169847
+Logistic_Regression,5,"{""model__C"": 1.0}",0.439921867731686
+KNN,6,"{""model__n_neighbors"": 31}",0.8016566314970087
+Logistic_Regression,6,"{""model__C"": 1.0}",0.4361799247043443
+KNN,7,"{""model__n_neighbors"": 31}",0.7686119653888182
+Logistic_Regression,7,"{""model__C"": 1.0}",0.4428587709323808
+KNN,8,"{""model__n_neighbors"": 31}",0.7630560787845114
+Logistic_Regression,8,"{""model__C"": 1.0}",0.44067213230248675
+KNN,9,"{""model__n_neighbors"": 31}",0.7620351850660465
+Logistic_Regression,9,"{""model__C"": 1.0}",0.4391647725109762
