@@ -60,7 +60,7 @@ Hepatic-Model-Comparison/
 │   ├── 01_eda.ipynb              # phân tích khám phá dữ liệu       ✅
 │   ├── 02_preprocesing.ipynb     # pipeline raw → interim → processed ✅
 │   ├── 03_baseline_models.ipynb  # baseline nhanh 6 model (1 lần train/val), tham khảo ✅
-│   ├── 04_model_track_a.ipynb    # họ mô hình A (dự kiến)            ⬜
+│   ├── 04_model_track_a.ipynb    # họ mô hình A: KNN + Logistic Regression ✅
 │   ├── 05_model_track_b.ipynb    # họ mô hình B: Decision Tree + Naive Bayes ⬜
 │   ├── 06_model_track_c.ipynb    # họ mô hình C: RF + XGBoost (dự kiến) ⬜
 │   ├── 07_report_assets.ipynb    # hình/bảng cho báo cáo (dự kiến)   ⬜
@@ -230,7 +230,7 @@ submission.make_submission(submission.load_test_ids(), y_proba)  # -> submission
 - [x] Phân tích khám phá dữ liệu (5 hình)
 - [x] Pipeline tiền xử lý `raw → interim → processed`
 - [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`, `submission.py`)
-- [ ] Mô hình track A
+- [x] Mô hình track A (KNN + Logistic Regression, 5-fold CV)
 - [ ] Mô hình track B
 - [ ] Mô hình track C (Random Forest + XGBoost)
 - [ ] Phân tích ý nghĩa thống kê
