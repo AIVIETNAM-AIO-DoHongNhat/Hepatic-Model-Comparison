@@ -140,6 +140,53 @@ Tầng thống kê (notebook 08, `src/stats.py`) là đóng góp nghiên cứu c
 - **Hiệu chỉnh so sánh bội** (Bonferroni) khi so nhiều mô hình cùng lúc.
 - **Kiểm tra calibration**, vì chỉ số log loss thưởng cho xác suất được hiệu chỉnh tốt.
 
+### 7.1. Protocol amendment cho phân tích cuối
+
+Phân tích cuối sử dụng **5 fold cố định dùng chung**, thay cho yêu cầu 10-fold trong
+task ban đầu. Fold chính thức được lấy từ `data/interim/fold_id.csv`; mọi score dùng
+cho kiểm định phải được ghép cặp theo cùng `fold_id`.
+
+Protocol so sánh nhiều mô hình đã được leader phê duyệt sau khi có kết quả
+(`leader-approved post-result protocol`), do đó **không được mô tả là preregistered**:
+
+- Mô hình tham chiếu: **XGBoost**, có mean final 5-fold log loss thấp nhất (`0.381948`).
+- Năm comparator: Random Forest, Logistic Regression, Decision Tree, KNN và Naive Bayes.
+- Metric chính: fold-level multiclass log loss; log loss thấp hơn là tốt hơn.
+- Chênh lệch ghép cặp: `difference = log_loss_XGBoost - log_loss_comparator`.
+  `difference < 0` nghĩa là XGBoost tốt hơn; `difference > 0` nghĩa là comparator tốt hơn.
+- Bonferroni family size: `5`; alpha tổng thể: `0.05`; adjusted alpha: `0.01`.
+- Adjusted p-value: `min(raw_p * 5, 1.0)`.
+
+Giới hạn phương pháp luận: lựa chọn siêu tham số và đánh giá cuối sử dụng cùng bộ
+fixed folds, không phải nested cross-validation. Vì vậy score và p-value có thể lạc
+quan, và mọi kết luận suy diễn phải được diễn giải thận trọng.
+
+**Trạng thái HEP-25:** `COMPLETE VIA LEADER-APPROVED POST-RESULT PROTOCOL AMENDMENT`.
+Task lịch sử yêu cầu 10-fold và lựa chọn protocol trước khi xem kết quả; sau khi có
+preliminary results, leader đã sửa protocol cuối thành shared 5-fold và năm phép so
+sánh lấy XGBoost làm reference. Amendment này được phê duyệt nhưng không hồi tố thành
+preregistration; source task được giữ nguyên để bảo toàn lịch sử yêu cầu.
+
+### 7.2. Kết luận thống kê theo primary-test protocol
+
+Kết luận cuối được điều khiển bởi primary test trong HEP-14, không chỉ bởi paired
+*t*-test của HEP-13:
+
+- Có bằng chứng XGBoost có fold-level log loss thấp hơn Random Forest, Decision Tree,
+  KNN và Naive Bayes sau Bonferroni correction.
+- Với Logistic Regression, Shapiro–Wilk cho `p ≈ 0.01423`, nên primary test là
+  two-sided exact Wilcoxon. Raw `p = 0.0625`, Bonferroni-adjusted `p = 0.3125`:
+  chưa đủ bằng chứng kết luận XGBoost tốt hơn Logistic Regression theo protocol,
+  đồng thời không được diễn giải là hai mô hình tương đương.
+
+Paired *t*-test và t-based CI có thể khác Wilcoxon vì dựa trên giả định và độ nhạy
+khác nhau. Chỉ có năm paired fold observations; Shapiro–Wilk có power rất thấp, còn
+two-sided exact Wilcoxon với `n=5` có độ phân giải p-value thô: ngay cả khi cả năm
+differences cùng chiều, p-value nhỏ nhất vẫn là `0.0625`. Vì adjusted alpha là `0.01`,
+Wilcoxon không đủ statistical resolution để đạt significance trong family này.
+Ngoài ra, training samples giữa các folds overlap nên fold-level inference cần được
+diễn giải thận trọng.
+
 ## 8. Sử dụng module dùng chung (`src/`)
 
 Bốn module trong `src/` được viết dưới dạng **package** để các notebook mô hình (`04`, `05`,
@@ -171,10 +218,11 @@ Hằng số: `RANDOM_STATE=42`, `N_FOLDS=5`, `LABELS=[0,1,2]`, `LABEL_MAP`, `CLA
 
 **`stats.py` — tầng thống kê** (điểm theo fold đã ghép cặp; với log loss thì nhỏ hơn = tốt hơn)
 
-- `paired_ttest`, `wilcoxon_test` — kiểm định ghép cặp trên chênh lệch theo fold
-- `ci_diff_t`, `ci_diff_bootstrap` — khoảng tin cậy cho chênh lệch trung bình (tham số & bootstrap)
-- `bonferroni_correction(pvalues, alpha)` — hiệu chỉnh so sánh bội
-- `brier_multiclass`, `expected_calibration_error`, `reliability_data` — kiểm tra calibration
+- `paired_ttest`, `wilcoxon_test`, `shapiro_test` — structured results cho kiểm định ghép cặp/giả định
+- `ci_diff_t`, `ci_diff_bootstrap` — structured confidence intervals cho chênh lệch trung bình
+- `bonferroni_correction(pvalues, alpha)` — structured Bonferroni result gồm family size và adjusted alpha
+- `brier_multiclass`, `top_label_ece`, `macro_classwise_ece` — calibration metrics đa lớp
+- `top_label_reliability_bins`, `classwise_reliability_bins`, `plot_reliability_diagram` — dữ liệu bin và biểu đồ calibration
 
 **`submission.py` — tạo file nộp bài thống nhất** (đúng định dạng `aio26_sample-submission.csv`)
 
@@ -208,9 +256,12 @@ from src import stats
 
 a = scores_track_a["log_loss"].values   # đã ghép cặp theo fold
 b = scores_track_b["log_loss"].values
-print(stats.paired_ttest(a, b))         # (t, p)
-print(stats.ci_diff_t(a, b))            # (mean_diff, low, high); không chứa 0 => có ý nghĩa
-reject, p_adj = stats.bonferroni_correction([p1, p2, p3])
+t_result = stats.paired_ttest(a, b)
+ci = stats.ci_diff_t(a, b)
+print(t_result.statistic, t_result.p_value, t_result.mean_difference)
+print(ci.low, ci.high)                  # không chứa 0 => có bằng chứng về chênh lệch
+correction = stats.bonferroni_correction([p1, p2, p3])
+print(correction.reject, correction.adjusted_p_values)
 ```
 
 **Ví dụ tạo file nộp bài:**
