@@ -1,0 +1,12 @@
+{
+  "status": "REPRODUCTION_FAILED",
+  "approved_for_calibration": false,
+  "artifact": "results/diagnostics/oof_xgboost_reproduction_attempt.csv",
+  "structural_validation": "PASS",
+  "metric_tolerance": 1e-05,
+  "max_metric_difference": 0.016901819109425342,
+  "matched_folds": 0,
+  "total_folds": 5,
+  "reference_score_file": "results/scores_track_c.csv",
+  "warning": "Diagnostic evidence only. Do not use for final ECE, Brier score, or reliability diagrams."
+}

@@ -241,3 +241,141 @@ def validate_oof_xgboost(oof: pd.DataFrame, official_folds: pd.DataFrame) -> dic
     if errors:
         raise ValueError("OOF validation failed: " + " ".join(errors))
     return report
+
+
+def reproduce_xgboost_oof(project_root: Path, tolerance: float = 1e-5) -> tuple[pd.DataFrame, dict, pd.DataFrame]:
+    """Recreate validation-only OOF probabilities for the frozen XGBoost config."""
+    from xgboost import XGBClassifier
+
+    from . import data, metrics
+
+    x, y, _ = data.load_processed()
+    fold_series = data.load_folds()
+    official_folds = pd.read_csv(project_root / "data" / "interim" / "fold_id.csv")
+    if not (len(x) == len(y) == len(fold_series) == len(official_folds) == 9_600):
+        raise ValueError("Processed data, labels, and official folds must all contain 9600 aligned rows.")
+
+    probabilities = np.full((len(x), 3), np.nan, dtype=float)
+    assigned = np.zeros(len(x), dtype=bool)
+    for fold, train_index, valid_index in data.iter_folds(fold_series):
+        if assigned[valid_index].any():
+            raise RuntimeError(f"Fold {fold} attempts to overwrite existing OOF rows.")
+        model = XGBClassifier(
+            n_estimators=400,
+            max_depth=2,
+            learning_rate=0.15,
+            random_state=data.RANDOM_STATE,
+            eval_metric="mlogloss",
+            n_jobs=-1,
+        )
+        model.fit(x.iloc[train_index], y.iloc[train_index])
+        if not np.array_equal(model.classes_, np.array(data.LABELS)):
+            raise RuntimeError(f"Unexpected XGBoost class order: {model.classes_}.")
+        probabilities[valid_index] = model.predict_proba(x.iloc[valid_index])
+        assigned[valid_index] = True
+    if not assigned.all():
+        raise RuntimeError("Not every training row received exactly one validation-fold prediction.")
+
+    class_names = np.asarray(data.CLASS_ORDER)
+    oof = pd.DataFrame(
+        {
+            "id": official_folds["id"].to_numpy(),
+            "fold": fold_series.to_numpy(dtype=int),
+            "model": REFERENCE_MODEL,
+            "y_true": class_names[y.to_numpy(dtype=int)],
+            "prob_C": probabilities[:, 0],
+            "prob_CL": probabilities[:, 1],
+            "prob_D": probabilities[:, 2],
+        }
+    )
+    validation = validate_oof_xgboost(oof, official_folds)
+    output = project_root / "results" / "diagnostics" / "oof_xgboost_reproduction_attempt.csv"
+    output.parent.mkdir(parents=True, exist_ok=True)
+    oof.to_csv(output, index=False)
+    validation.update(
+        {
+            "output": output.relative_to(project_root).as_posix(),
+            "frozen_config": {
+                "n_estimators": 400,
+                "max_depth": 2,
+                "learning_rate": 0.15,
+                "random_state": data.RANDOM_STATE,
+                "eval_metric": "mlogloss",
+                "n_jobs": -1,
+            },
+            "validation_only_generation": True,
+            "fold_source": "data/interim/fold_id.csv",
+        }
+    )
+    _write_json(project_root / "results" / "validation" / "oof_xgboost_validation.json", validation)
+
+    expected = pd.read_csv(project_root / "results" / "scores_track_c.csv")
+    expected = expected[expected["model"] == REFERENCE_MODEL].set_index("fold")
+    y_numeric = pd.Series(oof["y_true"]).map(data.LABEL_MAP).to_numpy(dtype=int)
+    reproduction_rows = []
+    for fold in EXPECTED_FOLDS:
+        mask = oof["fold"].to_numpy(dtype=int) == fold
+        actual = metrics.compute_metrics(y_numeric[mask], probabilities[mask])
+        row = {"fold": fold}
+        for metric_name in metrics.METRIC_NAMES:
+            expected_value = float(expected.loc[fold, metric_name])
+            actual_value = float(actual[metric_name])
+            row[f"expected_{metric_name}"] = expected_value
+            row[f"actual_{metric_name}"] = actual_value
+            row[f"abs_diff_{metric_name}"] = abs(actual_value - expected_value)
+        reproduction_rows.append(row)
+    reproduction = pd.DataFrame(reproduction_rows)
+    diff_columns = [column for column in reproduction if column.startswith("abs_diff_")]
+    max_abs_difference = float(reproduction[diff_columns].to_numpy().max())
+    gate_pass = bool(max_abs_difference <= tolerance)
+    reproduction["within_tolerance"] = reproduction[diff_columns].max(axis=1) <= tolerance
+    reproduction.to_csv(project_root / "results" / "validation" / "xgboost_oof_reproduction.csv", index=False)
+    gate = {
+        "status": "PASS" if gate_pass else "FAIL",
+        "tolerance": tolerance,
+        "max_absolute_metric_difference": max_abs_difference,
+        "folds_passed": int(reproduction["within_tolerance"].sum()),
+        "folds_total": len(EXPECTED_FOLDS),
+    }
+    _write_json(project_root / "results" / "validation" / "xgboost_oof_reproduction_gate.json", gate)
+    return oof, gate, reproduction
+
+
+def run_hep15_calibration(project_root: Path, n_bins: int = 10) -> dict:
+    """Create final calibration artifacts only after a passed reproduction gate."""
+    gate_path = project_root / "results" / "validation" / "xgboost_oof_reproduction_gate.json"
+    gate = json.loads(gate_path.read_text(encoding="utf-8"))
+    if gate.get("status") != "PASS":
+        raise RuntimeError("HEP-15 calibration is blocked because the reproduction gate did not pass.")
+    oof = pd.read_csv(
+        project_root / "results" / "diagnostics" / "oof_xgboost_reproduction_attempt.csv"
+    )
+    official_folds = pd.read_csv(project_root / "data" / "interim" / "fold_id.csv")
+    validate_oof_xgboost(oof, official_folds)
+    label_map = {name: index for index, name in enumerate(stats.CLASS_ORDER)}
+    y = oof["y_true"].map(label_map).to_numpy(dtype=int)
+    proba = oof[["prob_C", "prob_CL", "prob_D"]].to_numpy(dtype=float)
+    metrics_payload = {
+        "model": REFERENCE_MODEL,
+        "n_samples": len(oof),
+        "class_order": ",".join(stats.CLASS_ORDER),
+        "n_bins": n_bins,
+        "binning_strategy": "uniform",
+        "multiclass_brier_score": stats.brier_multiclass(y, proba),
+        "top_label_ece": stats.top_label_ece(y, proba, n_bins=n_bins),
+        "macro_classwise_ece": stats.macro_classwise_ece(y, proba, n_bins=n_bins),
+    }
+    tables = project_root / "tables"
+    figures = project_root / "figures" / "calibration"
+    tables.mkdir(parents=True, exist_ok=True)
+    figures.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame([metrics_payload]).to_csv(tables / "hep15_calibration_metrics.csv", index=False)
+    figure, _, top_bins, class_bins = stats.plot_reliability_diagram(y, proba, n_bins=n_bins)
+    top_bins.to_csv(tables / "hep15_top_label_reliability_bins.csv", index=False)
+    class_bins.to_csv(tables / "hep15_classwise_reliability_bins.csv", index=False)
+    figure.savefig(figures / "xgboost_reliability_diagram.png", dpi=160, bbox_inches="tight")
+    import matplotlib.pyplot as plt
+
+    plt.close(figure)
+    _write_json(project_root / "results" / "validation" / "hep15_calibration_metrics.json", metrics_payload)
+    return metrics_payload

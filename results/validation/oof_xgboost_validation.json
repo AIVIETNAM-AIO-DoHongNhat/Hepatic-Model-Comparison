@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "rows": 9600,
+  "unique_ids": 9600,
+  "fold_counts": {
+    "0": 1920,
+    "1": 1920,
+    "2": 1920,
+    "3": 1920,
+    "4": 1920
+  },
+  "probability_row_sum_max_abs_error": 8.731149137020111e-08,
+  "probability_row_sum_tolerance": 1e-06,
+  "fold_alignment_mismatches": 0,
+  "class_order": [
+    "C",
+    "CL",
+    "D"
+  ],
+  "errors": [],
+  "output": "results/diagnostics/oof_xgboost_reproduction_attempt.csv",
+  "frozen_config": {
+    "n_estimators": 400,
+    "max_depth": 2,
+    "learning_rate": 0.15,
+    "random_state": 42,
+    "eval_metric": "mlogloss",
+    "n_jobs": -1
+  },
+  "validation_only_generation": true,
+  "fold_source": "data/interim/fold_id.csv"
+}
