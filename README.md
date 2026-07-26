@@ -61,8 +61,8 @@ Hepatic-Model-Comparison/
 │   ├── 02_preprocesing.ipynb     # pipeline raw → interim → processed ✅
 │   ├── 03_baseline_models.ipynb  # baseline nhanh 6 model (1 lần train/val), tham khảo ✅
 │   ├── 04_model_track_a.ipynb    # họ mô hình A: KNN + Logistic Regression ✅
-│   ├── 05_model_track_b.ipynb    # họ mô hình B: Decision Tree + Naive Bayes ⬜
-│   ├── 06_model_track_c.ipynb    # họ mô hình C: RF + XGBoost (dự kiến) ⬜
+│   ├── 05_model_track_b.ipynb    # họ mô hình B: Decision Tree + Naive Bayes ✅
+│   ├── 06_model_track_c.ipynb    # họ mô hình C: RF + XGBoost (đã tune & freeze) ✅
 │   ├── 07_report_assets.ipynb    # hình/bảng cho báo cáo (dự kiến)   ⬜
 │   └── 08_statistics.ipynb       # kiểm định ý nghĩa (dự kiến)       ⬜
 ├── src/                # module dùng chung (import: from src import data, metrics, stats, submission)
@@ -126,7 +126,7 @@ jupyter lab
 1. `01_eda.ipynb` - phân tích khám phá, tạo lại `figures/eda/`.
 2. `02_preprocesing.ipynb` - dựng `data/interim/` và `data/processed/`.
 3. `03_baseline_models.ipynb` - baseline nhanh 6 model (1 lần train/val), tham khảo trước khi vào track chính thức.
-4. `04_model_track_a.ipynb` / `05_model_track_b.ipynb` / `06_model_track_c.ipynb` - huấn luyện các họ mô hình (track C: Random Forest + XGBoost), ghi `results/scores_track_*.csv`.
+4. `04_model_track_a.ipynb` / `05_model_track_b.ipynb` / `06_model_track_c.ipynb` - huấn luyện các họ mô hình, mỗi track tune hyperparameter bằng grid/line search trên fold dùng chung rồi **freeze** trước khi ghi `results/scores_track_*.csv` (track C: RF + XGBoost).
 5. `07_report_assets.ipynb` - xuất hình/bảng cuối cho báo cáo.
 6. `08_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
 
@@ -231,8 +231,8 @@ submission.make_submission(submission.load_test_ids(), y_proba)  # -> submission
 - [x] Pipeline tiền xử lý `raw → interim → processed`
 - [x] Hàm dùng chung trong `src/` (`data.py`, `metrics.py`, `stats.py`, `submission.py`)
 - [x] Mô hình track A (KNN + Logistic Regression, 5-fold CV)
-- [ ] Mô hình track B
-- [ ] Mô hình track C (Random Forest + XGBoost)
+- [x] Mô hình track B (Decision Tree + Naive Bayes, tune `max_depth`)
+- [x] Mô hình track C (Random Forest + XGBoost, tune & freeze hyperparameter)
 - [ ] Phân tích ý nghĩa thống kê
 - [ ] Hình/bảng báo cáo + báo cáo LaTeX cuối
 - [ ] File nộp Kaggle
