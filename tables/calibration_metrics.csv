@@ -1,0 +1,2 @@
+model,n_samples,class_order,n_bins,binning_strategy,multiclass_brier_score,top_label_ece,macro_classwise_ece
+XGBoost,9600,"C,CL,D",10,uniform,0.21620511782312732,0.011650781712184354,0.008474036241951312

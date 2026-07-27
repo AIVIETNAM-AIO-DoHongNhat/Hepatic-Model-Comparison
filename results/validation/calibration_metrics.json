@@ -1,0 +1,32 @@
+{
+  "model": "XGBoost",
+  "n_samples": 9600,
+  "class_order": "C,CL,D",
+  "n_bins": 10,
+  "binning_strategy": "uniform",
+  "multiclass_brier_score": 0.21620511782312732,
+  "top_label_ece": 0.011650781712184354,
+  "macro_classwise_ece": 0.008474036241951312,
+  "bin_sensitivity": [
+    {
+      "n_bins": 5,
+      "top_label_ece": 0.011650781712184357,
+      "macro_classwise_ece": 0.006569257194866965
+    },
+    {
+      "n_bins": 10,
+      "top_label_ece": 0.011650781712184354,
+      "macro_classwise_ece": 0.008474036241951312
+    },
+    {
+      "n_bins": 15,
+      "top_label_ece": 0.013832297852883703,
+      "macro_classwise_ece": 0.009431729824521326
+    },
+    {
+      "n_bins": 20,
+      "top_label_ece": 0.014439323438952349,
+      "macro_classwise_ece": 0.01060281174874906
+    }
+  ]
+}

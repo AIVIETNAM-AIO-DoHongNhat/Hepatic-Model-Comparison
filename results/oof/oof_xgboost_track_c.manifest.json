@@ -1,0 +1,1076 @@
+{
+  "artifact": "results/oof/oof_xgboost_track_c.csv",
+  "status": "AUTHORITATIVE",
+  "approved_for_calibration": true,
+  "generated_at": "2026-07-27T09:05:39.653644+00:00",
+  "reference_score_file": "results/scores_track_c.csv",
+  "track_c_provenance_commit": "aa1ce1a7a4f93a6d5cd75533d267efb791375603",
+  "environment": {
+    "python": "3.9.18",
+    "interpreter": "C:\\Users\\ADMIN\\miniconda3\\envs\\dynamic\\python.exe",
+    "conda_env": "dynamic",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "key_packages": {
+      "xgboost": "2.1.4",
+      "scikit-learn": "1.6.1",
+      "numpy": "1.26.4",
+      "pandas": "2.3.3",
+      "scipy": "1.13.1"
+    },
+    "matches_authoritative_env": true,
+    "expected_authoritative_env": {
+      "conda_env": "dynamic",
+      "python": "3.9.18"
+    },
+    "pip_freeze": [
+      "aiohappyeyeballs==2.6.1",
+      "aiohttp==3.13.5",
+      "aiosignal==1.4.0",
+      "annotated-doc==0.0.4",
+      "annotated-types==0.7.0",
+      "anyio==4.12.1",
+      "argon2-cffi==25.1.0",
+      "argon2-cffi-bindings==25.1.0",
+      "arrow==1.4.0",
+      "asttokens==3.0.2",
+      "async-lru==2.0.5",
+      "async-timeout==5.0.1",
+      "attrs==26.1.0",
+      "babel==2.18.0",
+      "beautifulsoup4==4.15.0",
+      "bleach==6.2.0",
+      "certifi==2026.6.17",
+      "cffi==2.0.0",
+      "charset-normalizer==3.4.9",
+      "click==8.1.8",
+      "colorama==0.4.6",
+      "comm==0.2.3",
+      "contourpy @ file:///C:/b/abs_b0lpi9pj9c/croot/contourpy_1738161183484/work",
+      "cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work",
+      "datasets==4.5.0",
+      "debugpy==1.8.21",
+      "decorator==5.3.1",
+      "defusedxml==0.7.1",
+      "dgl==2.2.1+cu118",
+      "dill==0.4.0",
+      "exceptiongroup==1.3.1",
+      "executing==2.2.1",
+      "fastjsonschema==2.21.2",
+      "filelock==3.19.1",
+      "fonttools @ file:///C:/miniconda3/conda-bld/fonttools_1759754888248/work",
+      "fqdn==1.5.1",
+      "frozenlist==1.8.0",
+      "fsspec==2025.10.0",
+      "gmpy2 @ file:///C:/b/abs_d8ki0o0h97/croot/gmpy2_1738085498525/work",
+      "h11==0.16.0",
+      "hf-xet==1.5.2",
+      "httpcore==1.0.9",
+      "httpx==0.28.1",
+      "huggingface_hub==1.8.0",
+      "idna==3.18",
+      "importlib_metadata==8.7.1",
+      "importlib_resources @ file:///C:/miniconda3/conda-bld/importlib_resources-suite_1759400849372/work",
+      "intel-openmp==2021.4.0",
+      "ipykernel==6.31.0",
+      "ipython==8.18.1",
+      "ipywidgets==8.1.8",
+      "isoduration==20.11.0",
+      "jedi==0.19.2",
+      "Jinja2==3.1.6",
+      "joblib==1.5.3",
+      "json5==0.15.0",
+      "jsonpointer==3.0.0",
+      "jsonschema==4.25.1",
+      "jsonschema-specifications==2025.9.1",
+      "jupyter==1.1.1",
+      "jupyter-console==6.6.3",
+      "jupyter-events==0.12.1",
+      "jupyter-lsp==2.3.1",
+      "jupyter_client==8.6.3",
+      "jupyter_core==5.8.1",
+      "jupyter_server==2.18.2",
+      "jupyter_server_terminals==0.5.4",
+      "jupyterlab==4.5.9",
+      "jupyterlab_pygments==0.3.0",
+      "jupyterlab_server==2.28.0",
+      "jupyterlab_widgets==3.0.16",
+      "kiwisolver @ file:///C:/b/abs_88mdhvtahm/croot/kiwisolver_1672387921783/work",
+      "lark==1.3.1",
+      "markdown-it-py==3.0.0",
+      "MarkupSafe==3.0.3",
+      "matplotlib==3.9.2",
+      "matplotlib-inline==0.2.2",
+      "mdurl==0.1.2",
+      "mistune==3.3.3",
+      "mkl==2021.4.0",
+      "mkl-service==2.5.2",
+      "mkl_fft @ file:///C:/b/abs_64riv3lfyn/croot/mkl_fft_1751310924052/work",
+      "mkl_random @ file:///C:/miniconda3/conda-bld/mkl_random_1761593078217/work",
+      "mpmath==1.3.0",
+      "multidict==6.7.1",
+      "multiprocess==0.70.18",
+      "nbclient==0.10.2",
+      "nbconvert==7.17.1",
+      "nbformat==5.10.4",
+      "nest-asyncio==1.6.0",
+      "networkx==3.2.1",
+      "notebook==7.5.7",
+      "notebook_shim==0.2.4",
+      "numpy @ file:///C:/b/abs_81ri0q57xq/croot/numpy_and_numpy_base_1755590863635/work/dist/numpy-1.26.4-cp39-cp39-win_amd64.whl#sha256=fb32ac616c403cd3962459034d608ce9daef8ff811cc8639c324d08dfdd5beb5",
+      "overrides==7.7.0",
+      "packaging @ file:///C:/miniconda3/conda-bld/packaging_1761049155343/work",
+      "pandas==2.3.3",
+      "pandocfilters==1.5.1",
+      "parso==0.8.7",
+      "pillow @ file:///C:/b/abs_b50vowcrzo/croot/pillow_1738010273782/work",
+      "platformdirs==4.4.0",
+      "prometheus_client==0.25.0",
+      "prompt_toolkit==3.0.52",
+      "propcache==0.4.1",
+      "psutil==7.2.2",
+      "pure_eval==0.2.3",
+      "pyarrow==21.0.0",
+      "pycparser==2.23",
+      "pydantic==2.13.4",
+      "pydantic_core==2.46.4",
+      "Pygments==2.20.0",
+      "pyparsing @ file:///C:/b/abs_40z8gyj9wi/croot/pyparsing_1731445739241/work",
+      "python-dateutil @ file:///C:/b/abs_3au_koqnbs/croot/python-dateutil_1716495777160/work",
+      "python-json-logger==4.0.0",
+      "pytz @ file:///C:/b/abs_f8wdzeix0n/croot/pytz_1752135878094/work",
+      "pywin32==312",
+      "pywinpty==3.0.3",
+      "PyYAML @ file:///C:/b/abs_14xkfs39bx/croot/pyyaml_1728657968772/work",
+      "pyzmq==27.1.0",
+      "referencing==0.36.2",
+      "requests==2.32.5",
+      "rfc3339-validator==0.1.4",
+      "rfc3986-validator==0.1.1",
+      "rfc3987-syntax==1.1.0",
+      "rich==15.0.0",
+      "rpds-py==0.27.1",
+      "scikit-learn==1.6.1",
+      "scipy==1.13.1",
+      "seaborn @ file:///C:/b/abs_0bv5x0ucxb/croot/seaborn_1749110315600/work",
+      "Send2Trash==2.1.0",
+      "shellingham==1.5.4",
+      "six @ file:///C:/b/abs_149wuyuo1o/croot/six_1744271521515/work",
+      "soupsieve==2.8.4",
+      "stack-data==0.6.3",
+      "sympy==1.14.0",
+      "tbb==2021.13.1",
+      "terminado==0.18.1",
+      "threadpoolctl==3.6.0",
+      "tinycss2==1.4.0",
+      "tomli==2.4.1",
+      "torch==2.3.0+cu118",
+      "torchdata==0.7.1",
+      "tornado==6.5.7",
+      "tqdm==4.68.4",
+      "traitlets==5.15.1",
+      "typer==0.23.2",
+      "typing-inspection==0.4.2",
+      "typing_extensions==4.16.0",
+      "tzdata==2026.3",
+      "uri-template==1.3.0",
+      "urllib3==2.6.3",
+      "wcwidth==0.8.2",
+      "webcolors==24.11.1",
+      "webencodings==0.5.1",
+      "websocket-client==1.9.0",
+      "widgetsnbextension==4.0.15",
+      "xgboost==2.1.4",
+      "xxhash==3.8.1",
+      "yarl==1.22.0",
+      "zipp @ file:///C:/b/abs_2fcpcg89my/croot/zipp_1732630746332/work"
+    ]
+  },
+  "model": {
+    "name": "XGBoost",
+    "frozen_config": {
+      "n_estimators": 400,
+      "max_depth": 2,
+      "learning_rate": 0.15,
+      "random_state": 42,
+      "eval_metric": "mlogloss",
+      "n_jobs": -1
+    },
+    "get_xgb_params": {
+      "fold_0": {
+        "objective": "multi:softprob",
+        "base_score": null,
+        "booster": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": null,
+        "device": null,
+        "eval_metric": "mlogloss",
+        "gamma": null,
+        "grow_policy": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.15,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 2,
+        "max_leaves": null,
+        "min_child_weight": null,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_jobs": -1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": null,
+        "tree_method": null,
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "fold_1": {
+        "objective": "multi:softprob",
+        "base_score": null,
+        "booster": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": null,
+        "device": null,
+        "eval_metric": "mlogloss",
+        "gamma": null,
+        "grow_policy": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.15,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 2,
+        "max_leaves": null,
+        "min_child_weight": null,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_jobs": -1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": null,
+        "tree_method": null,
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "fold_2": {
+        "objective": "multi:softprob",
+        "base_score": null,
+        "booster": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": null,
+        "device": null,
+        "eval_metric": "mlogloss",
+        "gamma": null,
+        "grow_policy": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.15,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 2,
+        "max_leaves": null,
+        "min_child_weight": null,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_jobs": -1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": null,
+        "tree_method": null,
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "fold_3": {
+        "objective": "multi:softprob",
+        "base_score": null,
+        "booster": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": null,
+        "device": null,
+        "eval_metric": "mlogloss",
+        "gamma": null,
+        "grow_policy": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.15,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 2,
+        "max_leaves": null,
+        "min_child_weight": null,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_jobs": -1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": null,
+        "tree_method": null,
+        "validate_parameters": null,
+        "verbosity": null
+      },
+      "fold_4": {
+        "objective": "multi:softprob",
+        "base_score": null,
+        "booster": null,
+        "colsample_bylevel": null,
+        "colsample_bynode": null,
+        "colsample_bytree": null,
+        "device": null,
+        "eval_metric": "mlogloss",
+        "gamma": null,
+        "grow_policy": null,
+        "interaction_constraints": null,
+        "learning_rate": 0.15,
+        "max_bin": null,
+        "max_cat_threshold": null,
+        "max_cat_to_onehot": null,
+        "max_delta_step": null,
+        "max_depth": 2,
+        "max_leaves": null,
+        "min_child_weight": null,
+        "monotone_constraints": null,
+        "multi_strategy": null,
+        "n_jobs": -1,
+        "num_parallel_tree": null,
+        "random_state": 42,
+        "reg_alpha": null,
+        "reg_lambda": null,
+        "sampling_method": null,
+        "scale_pos_weight": null,
+        "subsample": null,
+        "tree_method": null,
+        "validate_parameters": null,
+        "verbosity": null
+      }
+    },
+    "get_xgb_params_identical_across_folds": true,
+    "booster_save_config": {
+      "fold_0": {
+        "learner": {
+          "generic_param": {
+            "device": "cpu",
+            "fail_on_invalid_gpu_id": "0",
+            "n_jobs": "-1",
+            "nthread": "-1",
+            "random_state": "42",
+            "seed": "42",
+            "seed_per_iteration": "0",
+            "validate_parameters": "1"
+          },
+          "gradient_booster": {
+            "gbtree_model_param": {
+              "num_parallel_tree": "1",
+              "num_trees": "1200"
+            },
+            "gbtree_train_param": {
+              "process_type": "default",
+              "tree_method": "auto",
+              "updater": "grow_quantile_histmaker",
+              "updater_seq": "grow_quantile_histmaker"
+            },
+            "name": "gbtree",
+            "specified_updater": false,
+            "tree_train_param": {
+              "alpha": "0",
+              "cache_opt": "1",
+              "colsample_bylevel": "1",
+              "colsample_bynode": "1",
+              "colsample_bytree": "1",
+              "eta": "0.150000006",
+              "gamma": "0",
+              "grow_policy": "depthwise",
+              "interaction_constraints": "",
+              "lambda": "1",
+              "learning_rate": "0.150000006",
+              "max_bin": "256",
+              "max_cat_threshold": "64",
+              "max_cat_to_onehot": "4",
+              "max_delta_step": "0",
+              "max_depth": "2",
+              "max_leaves": "0",
+              "min_child_weight": "1",
+              "min_split_loss": "0",
+              "monotone_constraints": "()",
+              "refresh_leaf": "1",
+              "reg_alpha": "0",
+              "reg_lambda": "1",
+              "sampling_method": "uniform",
+              "sketch_ratio": "2",
+              "sparse_threshold": "0.20000000000000001",
+              "subsample": "1"
+            },
+            "updater": [
+              {
+                "hist_train_param": {
+                  "debug_synchronize": "0",
+                  "max_cached_hist_node": "65536"
+                },
+                "name": "grow_quantile_histmaker"
+              }
+            ]
+          },
+          "learner_model_param": {
+            "base_score": "5E-1",
+            "boost_from_average": "1",
+            "num_class": "3",
+            "num_feature": "31",
+            "num_target": "1"
+          },
+          "learner_train_param": {
+            "booster": "gbtree",
+            "disable_default_eval_metric": "0",
+            "multi_strategy": "one_output_per_tree",
+            "objective": "multi:softprob"
+          },
+          "metrics": [
+            {
+              "name": "mlogloss"
+            }
+          ],
+          "objective": {
+            "name": "multi:softprob",
+            "softmax_multiclass_param": {
+              "num_class": "3"
+            }
+          }
+        },
+        "version": [
+          2,
+          1,
+          4
+        ]
+      },
+      "fold_1": {
+        "learner": {
+          "generic_param": {
+            "device": "cpu",
+            "fail_on_invalid_gpu_id": "0",
+            "n_jobs": "-1",
+            "nthread": "-1",
+            "random_state": "42",
+            "seed": "42",
+            "seed_per_iteration": "0",
+            "validate_parameters": "1"
+          },
+          "gradient_booster": {
+            "gbtree_model_param": {
+              "num_parallel_tree": "1",
+              "num_trees": "1200"
+            },
+            "gbtree_train_param": {
+              "process_type": "default",
+              "tree_method": "auto",
+              "updater": "grow_quantile_histmaker",
+              "updater_seq": "grow_quantile_histmaker"
+            },
+            "name": "gbtree",
+            "specified_updater": false,
+            "tree_train_param": {
+              "alpha": "0",
+              "cache_opt": "1",
+              "colsample_bylevel": "1",
+              "colsample_bynode": "1",
+              "colsample_bytree": "1",
+              "eta": "0.150000006",
+              "gamma": "0",
+              "grow_policy": "depthwise",
+              "interaction_constraints": "",
+              "lambda": "1",
+              "learning_rate": "0.150000006",
+              "max_bin": "256",
+              "max_cat_threshold": "64",
+              "max_cat_to_onehot": "4",
+              "max_delta_step": "0",
+              "max_depth": "2",
+              "max_leaves": "0",
+              "min_child_weight": "1",
+              "min_split_loss": "0",
+              "monotone_constraints": "()",
+              "refresh_leaf": "1",
+              "reg_alpha": "0",
+              "reg_lambda": "1",
+              "sampling_method": "uniform",
+              "sketch_ratio": "2",
+              "sparse_threshold": "0.20000000000000001",
+              "subsample": "1"
+            },
+            "updater": [
+              {
+                "hist_train_param": {
+                  "debug_synchronize": "0",
+                  "max_cached_hist_node": "65536"
+                },
+                "name": "grow_quantile_histmaker"
+              }
+            ]
+          },
+          "learner_model_param": {
+            "base_score": "5E-1",
+            "boost_from_average": "1",
+            "num_class": "3",
+            "num_feature": "31",
+            "num_target": "1"
+          },
+          "learner_train_param": {
+            "booster": "gbtree",
+            "disable_default_eval_metric": "0",
+            "multi_strategy": "one_output_per_tree",
+            "objective": "multi:softprob"
+          },
+          "metrics": [
+            {
+              "name": "mlogloss"
+            }
+          ],
+          "objective": {
+            "name": "multi:softprob",
+            "softmax_multiclass_param": {
+              "num_class": "3"
+            }
+          }
+        },
+        "version": [
+          2,
+          1,
+          4
+        ]
+      },
+      "fold_2": {
+        "learner": {
+          "generic_param": {
+            "device": "cpu",
+            "fail_on_invalid_gpu_id": "0",
+            "n_jobs": "-1",
+            "nthread": "-1",
+            "random_state": "42",
+            "seed": "42",
+            "seed_per_iteration": "0",
+            "validate_parameters": "1"
+          },
+          "gradient_booster": {
+            "gbtree_model_param": {
+              "num_parallel_tree": "1",
+              "num_trees": "1200"
+            },
+            "gbtree_train_param": {
+              "process_type": "default",
+              "tree_method": "auto",
+              "updater": "grow_quantile_histmaker",
+              "updater_seq": "grow_quantile_histmaker"
+            },
+            "name": "gbtree",
+            "specified_updater": false,
+            "tree_train_param": {
+              "alpha": "0",
+              "cache_opt": "1",
+              "colsample_bylevel": "1",
+              "colsample_bynode": "1",
+              "colsample_bytree": "1",
+              "eta": "0.150000006",
+              "gamma": "0",
+              "grow_policy": "depthwise",
+              "interaction_constraints": "",
+              "lambda": "1",
+              "learning_rate": "0.150000006",
+              "max_bin": "256",
+              "max_cat_threshold": "64",
+              "max_cat_to_onehot": "4",
+              "max_delta_step": "0",
+              "max_depth": "2",
+              "max_leaves": "0",
+              "min_child_weight": "1",
+              "min_split_loss": "0",
+              "monotone_constraints": "()",
+              "refresh_leaf": "1",
+              "reg_alpha": "0",
+              "reg_lambda": "1",
+              "sampling_method": "uniform",
+              "sketch_ratio": "2",
+              "sparse_threshold": "0.20000000000000001",
+              "subsample": "1"
+            },
+            "updater": [
+              {
+                "hist_train_param": {
+                  "debug_synchronize": "0",
+                  "max_cached_hist_node": "65536"
+                },
+                "name": "grow_quantile_histmaker"
+              }
+            ]
+          },
+          "learner_model_param": {
+            "base_score": "5E-1",
+            "boost_from_average": "1",
+            "num_class": "3",
+            "num_feature": "31",
+            "num_target": "1"
+          },
+          "learner_train_param": {
+            "booster": "gbtree",
+            "disable_default_eval_metric": "0",
+            "multi_strategy": "one_output_per_tree",
+            "objective": "multi:softprob"
+          },
+          "metrics": [
+            {
+              "name": "mlogloss"
+            }
+          ],
+          "objective": {
+            "name": "multi:softprob",
+            "softmax_multiclass_param": {
+              "num_class": "3"
+            }
+          }
+        },
+        "version": [
+          2,
+          1,
+          4
+        ]
+      },
+      "fold_3": {
+        "learner": {
+          "generic_param": {
+            "device": "cpu",
+            "fail_on_invalid_gpu_id": "0",
+            "n_jobs": "-1",
+            "nthread": "-1",
+            "random_state": "42",
+            "seed": "42",
+            "seed_per_iteration": "0",
+            "validate_parameters": "1"
+          },
+          "gradient_booster": {
+            "gbtree_model_param": {
+              "num_parallel_tree": "1",
+              "num_trees": "1200"
+            },
+            "gbtree_train_param": {
+              "process_type": "default",
+              "tree_method": "auto",
+              "updater": "grow_quantile_histmaker",
+              "updater_seq": "grow_quantile_histmaker"
+            },
+            "name": "gbtree",
+            "specified_updater": false,
+            "tree_train_param": {
+              "alpha": "0",
+              "cache_opt": "1",
+              "colsample_bylevel": "1",
+              "colsample_bynode": "1",
+              "colsample_bytree": "1",
+              "eta": "0.150000006",
+              "gamma": "0",
+              "grow_policy": "depthwise",
+              "interaction_constraints": "",
+              "lambda": "1",
+              "learning_rate": "0.150000006",
+              "max_bin": "256",
+              "max_cat_threshold": "64",
+              "max_cat_to_onehot": "4",
+              "max_delta_step": "0",
+              "max_depth": "2",
+              "max_leaves": "0",
+              "min_child_weight": "1",
+              "min_split_loss": "0",
+              "monotone_constraints": "()",
+              "refresh_leaf": "1",
+              "reg_alpha": "0",
+              "reg_lambda": "1",
+              "sampling_method": "uniform",
+              "sketch_ratio": "2",
+              "sparse_threshold": "0.20000000000000001",
+              "subsample": "1"
+            },
+            "updater": [
+              {
+                "hist_train_param": {
+                  "debug_synchronize": "0",
+                  "max_cached_hist_node": "65536"
+                },
+                "name": "grow_quantile_histmaker"
+              }
+            ]
+          },
+          "learner_model_param": {
+            "base_score": "5E-1",
+            "boost_from_average": "1",
+            "num_class": "3",
+            "num_feature": "31",
+            "num_target": "1"
+          },
+          "learner_train_param": {
+            "booster": "gbtree",
+            "disable_default_eval_metric": "0",
+            "multi_strategy": "one_output_per_tree",
+            "objective": "multi:softprob"
+          },
+          "metrics": [
+            {
+              "name": "mlogloss"
+            }
+          ],
+          "objective": {
+            "name": "multi:softprob",
+            "softmax_multiclass_param": {
+              "num_class": "3"
+            }
+          }
+        },
+        "version": [
+          2,
+          1,
+          4
+        ]
+      },
+      "fold_4": {
+        "learner": {
+          "generic_param": {
+            "device": "cpu",
+            "fail_on_invalid_gpu_id": "0",
+            "n_jobs": "-1",
+            "nthread": "-1",
+            "random_state": "42",
+            "seed": "42",
+            "seed_per_iteration": "0",
+            "validate_parameters": "1"
+          },
+          "gradient_booster": {
+            "gbtree_model_param": {
+              "num_parallel_tree": "1",
+              "num_trees": "1200"
+            },
+            "gbtree_train_param": {
+              "process_type": "default",
+              "tree_method": "auto",
+              "updater": "grow_quantile_histmaker",
+              "updater_seq": "grow_quantile_histmaker"
+            },
+            "name": "gbtree",
+            "specified_updater": false,
+            "tree_train_param": {
+              "alpha": "0",
+              "cache_opt": "1",
+              "colsample_bylevel": "1",
+              "colsample_bynode": "1",
+              "colsample_bytree": "1",
+              "eta": "0.150000006",
+              "gamma": "0",
+              "grow_policy": "depthwise",
+              "interaction_constraints": "",
+              "lambda": "1",
+              "learning_rate": "0.150000006",
+              "max_bin": "256",
+              "max_cat_threshold": "64",
+              "max_cat_to_onehot": "4",
+              "max_delta_step": "0",
+              "max_depth": "2",
+              "max_leaves": "0",
+              "min_child_weight": "1",
+              "min_split_loss": "0",
+              "monotone_constraints": "()",
+              "refresh_leaf": "1",
+              "reg_alpha": "0",
+              "reg_lambda": "1",
+              "sampling_method": "uniform",
+              "sketch_ratio": "2",
+              "sparse_threshold": "0.20000000000000001",
+              "subsample": "1"
+            },
+            "updater": [
+              {
+                "hist_train_param": {
+                  "debug_synchronize": "0",
+                  "max_cached_hist_node": "65536"
+                },
+                "name": "grow_quantile_histmaker"
+              }
+            ]
+          },
+          "learner_model_param": {
+            "base_score": "5E-1",
+            "boost_from_average": "1",
+            "num_class": "3",
+            "num_feature": "31",
+            "num_target": "1"
+          },
+          "learner_train_param": {
+            "booster": "gbtree",
+            "disable_default_eval_metric": "0",
+            "multi_strategy": "one_output_per_tree",
+            "objective": "multi:softprob"
+          },
+          "metrics": [
+            {
+              "name": "mlogloss"
+            }
+          ],
+          "objective": {
+            "name": "multi:softprob",
+            "softmax_multiclass_param": {
+              "num_class": "3"
+            }
+          }
+        },
+        "version": [
+          2,
+          1,
+          4
+        ]
+      }
+    },
+    "booster_save_config_identical_across_folds": true
+  },
+  "data": {
+    "n_rows": 9600,
+    "n_features": 31,
+    "ordered_features": [
+      "Followup_Days",
+      "Treatment_Assignment",
+      "Patient_Age_Days",
+      "Patient_Sex",
+      "Ascites_Indicator",
+      "Liver_Enlargement",
+      "Spider_Angioma",
+      "Bilirubin_Level",
+      "Cholesterol_Level",
+      "Albumin_Level",
+      "Copper_Level",
+      "Alkaline_Phosphatase",
+      "AST_Level",
+      "Triglyceride_Level",
+      "Platelet_Count",
+      "Prothrombin_Time",
+      "Clinical_Stage",
+      "Patient_Age_Years",
+      "Cholesterol_Level_flag",
+      "Triglyceride_Level_flag",
+      "Copper_Level_flag",
+      "Alkaline_Phosphatase_flag",
+      "AST_Level_flag",
+      "Platelet_Count_flag",
+      "Prothrombin_Time_flag",
+      "Treatment_Assignment_flag",
+      "Ascites_Indicator_flag",
+      "Liver_Enlargement_flag",
+      "Spider_Angioma_flag",
+      "Edema_Status_flag",
+      "Bilirubin_Albumin_Ratio"
+    ],
+    "ordered_features_match_feature_list_csv": true,
+    "fold_source": "data/interim/fold_id.csv",
+    "class_order": [
+      "C",
+      "CL",
+      "D"
+    ],
+    "label_map": {
+      "C": 0,
+      "CL": 1,
+      "D": 2
+    },
+    "random_state": 42,
+    "n_folds": 5,
+    "sha256": {
+      "data/processed/train_X.csv": "17eecfdece02a5261d42ced2fa0faa46cff08f9dc43cf63b9dfa70ce53329b9b",
+      "data/processed/train_y.csv": "d72aad5e5ad10397dfb67a90712838dcb3eb51ca72955e6c8fb79758db717982",
+      "data/interim/fold_id.csv": "a75dc5286e5d2c82e4f21d54982667f706da747bc71026f8b08645140f9a15e2",
+      "data/processed/feature_list.csv": "323e37fa57eaa0503f5b8ca3a5e0457192ab29b29139ae7107903cd50f815bc4",
+      "data/processed/scaler.pkl": "9c2eb908a2d7c0702d1a5d96a1791fbd355bf1e1fd4d539e409024de5c0e4830",
+      "data/processed/cat_encoder.pkl": "045c32afa9d9f61545f9c1be2afb301e9883b673242c66f4c7b9b17f5e8992af",
+      "data/processed/label_encoder.pkl": "0f7efe1ef839a0aebf48867420ef2b579459bf77c15257e941f0bc029314c939",
+      "results/scores_track_c.csv": "e8cb6879975ccc3dbc78582f0519e23bdeb2540b41fa617b32665808c4299e5f"
+    }
+  },
+  "oof": {
+    "schema": [
+      "id",
+      "fold",
+      "model",
+      "y_true",
+      "prob_C",
+      "prob_CL",
+      "prob_D"
+    ],
+    "validation": {
+      "status": "PASS",
+      "rows": 9600,
+      "unique_ids": 9600,
+      "fold_counts": {
+        "0": 1920,
+        "1": 1920,
+        "2": 1920,
+        "3": 1920,
+        "4": 1920
+      },
+      "probability_row_sum_max_abs_error": 8.579809218645096e-08,
+      "probability_row_sum_tolerance": 1e-06,
+      "fold_alignment_mismatches": 0,
+      "class_order": [
+        "C",
+        "CL",
+        "D"
+      ],
+      "errors": [],
+      "output": "results/oof/oof_xgboost_track_c.csv",
+      "frozen_config": {
+        "n_estimators": 400,
+        "max_depth": 2,
+        "learning_rate": 0.15,
+        "random_state": 42,
+        "eval_metric": "mlogloss",
+        "n_jobs": -1
+      },
+      "validation_only_generation": true,
+      "fold_source": "data/interim/fold_id.csv"
+    },
+    "leakage_check": {
+      "per_fold": [
+        {
+          "fold": 0,
+          "n_train": 7680,
+          "n_valid": 1920,
+          "n_train_valid_overlap": 0,
+          "trained_without_validation_fold": true
+        },
+        {
+          "fold": 1,
+          "n_train": 7680,
+          "n_valid": 1920,
+          "n_train_valid_overlap": 0,
+          "trained_without_validation_fold": true
+        },
+        {
+          "fold": 2,
+          "n_train": 7680,
+          "n_valid": 1920,
+          "n_train_valid_overlap": 0,
+          "trained_without_validation_fold": true
+        },
+        {
+          "fold": 3,
+          "n_train": 7680,
+          "n_valid": 1920,
+          "n_train_valid_overlap": 0,
+          "trained_without_validation_fold": true
+        },
+        {
+          "fold": 4,
+          "n_train": 7680,
+          "n_valid": 1920,
+          "n_train_valid_overlap": 0,
+          "trained_without_validation_fold": true
+        }
+      ],
+      "every_row_predicted_exactly_once": true,
+      "guarantee": "Mỗi dòng chỉ được dự đoán bởi model train trên (fold != fold của dòng đó); id train và id valid rời nhau ở cả 5 fold."
+    }
+  },
+  "reproduction": {
+    "tolerance": 1e-05,
+    "gate": {
+      "status": "PASS",
+      "tolerance": 1e-05,
+      "max_absolute_metric_difference": 5.551115123125783e-17,
+      "folds_passed": 5,
+      "folds_total": 5
+    },
+    "per_fold": [
+      {
+        "fold": 0,
+        "expected_log_loss": 0.3894707864478374,
+        "actual_log_loss": 0.3894707864478374,
+        "abs_diff_log_loss": 0.0,
+        "expected_accuracy": 0.8484375,
+        "actual_accuracy": 0.8484375,
+        "abs_diff_accuracy": 0.0,
+        "expected_macro_f1": 0.6313309690529675,
+        "actual_macro_f1": 0.6313309690529675,
+        "abs_diff_macro_f1": 0.0,
+        "within_tolerance": true
+      },
+      {
+        "fold": 1,
+        "expected_log_loss": 0.3723440979029816,
+        "actual_log_loss": 0.3723440979029816,
+        "abs_diff_log_loss": 0.0,
+        "expected_accuracy": 0.8609375,
+        "actual_accuracy": 0.8609375,
+        "abs_diff_accuracy": 0.0,
+        "expected_macro_f1": 0.6093997599058395,
+        "actual_macro_f1": 0.6093997599058395,
+        "abs_diff_macro_f1": 0.0,
+        "within_tolerance": true
+      },
+      {
+        "fold": 2,
+        "expected_log_loss": 0.3817388972498605,
+        "actual_log_loss": 0.38173889724986054,
+        "abs_diff_log_loss": 5.551115123125783e-17,
+        "expected_accuracy": 0.8479166666666667,
+        "actual_accuracy": 0.8479166666666667,
+        "abs_diff_accuracy": 0.0,
+        "expected_macro_f1": 0.6706125709899973,
+        "actual_macro_f1": 0.6706125709899973,
+        "abs_diff_macro_f1": 0.0,
+        "within_tolerance": true
+      },
+      {
+        "fold": 3,
+        "expected_log_loss": 0.3773737074788787,
+        "actual_log_loss": 0.3773737074788787,
+        "abs_diff_log_loss": 0.0,
+        "expected_accuracy": 0.8463541666666666,
+        "actual_accuracy": 0.8463541666666666,
+        "abs_diff_accuracy": 0.0,
+        "expected_macro_f1": 0.6125744235923003,
+        "actual_macro_f1": 0.6125744235923003,
+        "abs_diff_macro_f1": 0.0,
+        "within_tolerance": true
+      },
+      {
+        "fold": 4,
+        "expected_log_loss": 0.3888117836978295,
+        "actual_log_loss": 0.3888117836978295,
+        "abs_diff_log_loss": 0.0,
+        "expected_accuracy": 0.8458333333333333,
+        "actual_accuracy": 0.8458333333333333,
+        "abs_diff_accuracy": 0.0,
+        "expected_macro_f1": 0.6762784769207334,
+        "actual_macro_f1": 0.6762784769207334,
+        "abs_diff_macro_f1": 0.0,
+        "within_tolerance": true
+      }
+    ],
+    "metric_source": "src.metrics.compute_metrics (đúng hàm đã sinh scores_track_c.csv)"
+  },
+  "known_benign_warnings": [
+    "sklearn.metrics log_loss: 'The y_pred values do not sum to one.' — xgboost trả float32 nên tổng xác suất mỗi hàng lệch ~8.7e-08, dưới ngưỡng 1e-6 của validate_oof_xgboost() và không ảnh hưởng metric. Cố ý KHÔNG normalize lại."
+  ]
+}

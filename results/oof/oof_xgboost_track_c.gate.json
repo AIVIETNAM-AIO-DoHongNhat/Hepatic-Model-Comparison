@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "tolerance": 1e-05,
+  "max_absolute_metric_difference": 5.551115123125783e-17,
+  "folds_passed": 5,
+  "folds_total": 5
+}

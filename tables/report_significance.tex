@@ -1,0 +1,15 @@
+\begin{table}
+\caption{Kiểm định ghép cặp XGBoost với 5 mô hình còn lại, Bonferroni family size 5.}
+\label{tab:report_significance}
+\begin{tabular}{llllllll}
+\toprule
+So với & Chênh lệch TB & CI 95\% & Shapiro p & Kiểm định chính & p thô & p Bonferroni & Kết luận \\
+\midrule
+Random Forest & -0.0240 & [-0.0287, -0.0192] & 0.4627 & paired t-test & 0.00015 & 0.00075 & XGBoost tốt hơn \\
+Logistic Regression & -0.0586 & [-0.0673, -0.0498] & 0.0142 & Wilcoxon & 0.06250 & 0.31250 & Chưa đủ bằng chứng \\
+Decision Tree & -0.0923 & [-0.1035, -0.0812] & 0.5161 & paired t-test & 0.00002 & 0.00011 & XGBoost tốt hơn \\
+KNN & -0.2783 & [-0.3496, -0.2071] & 0.3438 & paired t-test & 0.00041 & 0.00205 & XGBoost tốt hơn \\
+Naive Bayes & -1.8287 & [-2.0919, -1.5656] & 0.5702 & paired t-test & 0.00004 & 0.00021 & XGBoost tốt hơn \\
+\bottomrule
+\end{tabular}
+\end{table}
