@@ -1,0 +1,185 @@
+# ĐÂY LÀ BẢN GHI PROVENANCE (không phải file cài đặt thường dùng).
+#
+# Môi trường authoritative đã sinh ra results/scores_track_c.csv (Track C final)
+# và results/oof/oof_xgboost_track_c.csv (OOF dùng cho phân tích calibration).
+#
+#   conda env      : dynamic
+#   interpreter    : C:\Users\ADMIN\miniconda3\envs\dynamic\python.exe
+#   Python         : 3.9.18
+#   pip freeze lúc : 2026-07-26
+#
+# Vì sao cần file này: notebooks/06_model_track_c.ipynb chỉ lưu kernelspec "dynamic"
+# và language_info.version "3.9.18", KHÔNG lưu version package. Vì thiếu bản ghi này,
+# một lần tái tạo OOF trước đó đã chạy trên Python 3.13.3 / xgboost 3.3.0 / sklearn 1.8.0
+# và lệch metric tới 1.69e-2 -> fail 5/5 fold, dẫn tới kết luận sai là "mất provenance".
+# Chạy lại đúng trong env này thì khớp tuyệt đối (sai lệch tối đa 5.55e-17).
+#
+# Các package quyết định con số của Track C:
+#   xgboost==2.1.4  scikit-learn==1.6.1  numpy==1.26.4  pandas==2.3.3  scipy==1.13.1
+#
+# LƯU Ý 1: vài dòng dưới là bản conda build cục bộ dạng "@ file:///..." nên KHÔNG
+# pip install lại được trên máy khác. Muốn tái lập chính xác thì tạo env conda
+# Python 3.9.18 rồi pin đúng 5 package nêu trên.
+# LƯU Ý 2: matplotlib ở đây là 3.9.2, THẤP hơn bound ">=3.9.4" trong requirements.txt.
+# matplotlib chỉ dùng để vẽ hình, không ảnh hưởng metric của model.
+
+aiohappyeyeballs==2.6.1
+aiohttp==3.13.5
+aiosignal==1.4.0
+annotated-doc==0.0.4
+annotated-types==0.7.0
+anyio==4.12.1
+argon2-cffi==25.1.0
+argon2-cffi-bindings==25.1.0
+arrow==1.4.0
+asttokens==3.0.2
+async-lru==2.0.5
+async-timeout==5.0.1
+attrs==26.1.0
+babel==2.18.0
+beautifulsoup4==4.15.0
+bleach==6.2.0
+certifi==2026.6.17
+cffi==2.0.0
+charset-normalizer==3.4.9
+click==8.1.8
+colorama==0.4.6
+comm==0.2.3
+contourpy @ file:///C:/b/abs_b0lpi9pj9c/croot/contourpy_1738161183484/work
+cycler @ file:///tmp/build/80754af9/cycler_1637851556182/work
+datasets==4.5.0
+debugpy==1.8.21
+decorator==5.3.1
+defusedxml==0.7.1
+dgl==2.2.1+cu118
+dill==0.4.0
+exceptiongroup==1.3.1
+executing==2.2.1
+fastjsonschema==2.21.2
+filelock==3.19.1
+fonttools @ file:///C:/miniconda3/conda-bld/fonttools_1759754888248/work
+fqdn==1.5.1
+frozenlist==1.8.0
+fsspec==2025.10.0
+gmpy2 @ file:///C:/b/abs_d8ki0o0h97/croot/gmpy2_1738085498525/work
+h11==0.16.0
+hf-xet==1.5.2
+httpcore==1.0.9
+httpx==0.28.1
+huggingface_hub==1.8.0
+idna==3.18
+importlib_metadata==8.7.1
+importlib_resources @ file:///C:/miniconda3/conda-bld/importlib_resources-suite_1759400849372/work
+intel-openmp==2021.4.0
+ipykernel==6.31.0
+ipython==8.18.1
+ipywidgets==8.1.8
+isoduration==20.11.0
+jedi==0.19.2
+Jinja2==3.1.6
+joblib==1.5.3
+json5==0.15.0
+jsonpointer==3.0.0
+jsonschema==4.25.1
+jsonschema-specifications==2025.9.1
+jupyter==1.1.1
+jupyter-console==6.6.3
+jupyter-events==0.12.1
+jupyter-lsp==2.3.1
+jupyter_client==8.6.3
+jupyter_core==5.8.1
+jupyter_server==2.18.2
+jupyter_server_terminals==0.5.4
+jupyterlab==4.5.9
+jupyterlab_pygments==0.3.0
+jupyterlab_server==2.28.0
+jupyterlab_widgets==3.0.16
+kiwisolver @ file:///C:/b/abs_88mdhvtahm/croot/kiwisolver_1672387921783/work
+lark==1.3.1
+markdown-it-py==3.0.0
+MarkupSafe==3.0.3
+matplotlib==3.9.2
+matplotlib-inline==0.2.2
+mdurl==0.1.2
+mistune==3.3.3
+mkl==2021.4.0
+mkl-service==2.5.2
+mkl_fft @ file:///C:/b/abs_64riv3lfyn/croot/mkl_fft_1751310924052/work
+mkl_random @ file:///C:/miniconda3/conda-bld/mkl_random_1761593078217/work
+mpmath==1.3.0
+multidict==6.7.1
+multiprocess==0.70.18
+nbclient==0.10.2
+nbconvert==7.17.1
+nbformat==5.10.4
+nest-asyncio==1.6.0
+networkx==3.2.1
+notebook==7.5.7
+notebook_shim==0.2.4
+numpy @ file:///C:/b/abs_81ri0q57xq/croot/numpy_and_numpy_base_1755590863635/work/dist/numpy-1.26.4-cp39-cp39-win_amd64.whl#sha256=fb32ac616c403cd3962459034d608ce9daef8ff811cc8639c324d08dfdd5beb5
+overrides==7.7.0
+packaging @ file:///C:/miniconda3/conda-bld/packaging_1761049155343/work
+pandas==2.3.3
+pandocfilters==1.5.1
+parso==0.8.7
+pillow @ file:///C:/b/abs_b50vowcrzo/croot/pillow_1738010273782/work
+platformdirs==4.4.0
+prometheus_client==0.25.0
+prompt_toolkit==3.0.52
+propcache==0.4.1
+psutil==7.2.2
+pure_eval==0.2.3
+pyarrow==21.0.0
+pycparser==2.23
+pydantic==2.13.4
+pydantic_core==2.46.4
+Pygments==2.20.0
+pyparsing @ file:///C:/b/abs_40z8gyj9wi/croot/pyparsing_1731445739241/work
+python-dateutil @ file:///C:/b/abs_3au_koqnbs/croot/python-dateutil_1716495777160/work
+python-json-logger==4.0.0
+pytz @ file:///C:/b/abs_f8wdzeix0n/croot/pytz_1752135878094/work
+pywin32==312
+pywinpty==3.0.3
+PyYAML @ file:///C:/b/abs_14xkfs39bx/croot/pyyaml_1728657968772/work
+pyzmq==27.1.0
+referencing==0.36.2
+requests==2.32.5
+rfc3339-validator==0.1.4
+rfc3986-validator==0.1.1
+rfc3987-syntax==1.1.0
+rich==15.0.0
+rpds-py==0.27.1
+scikit-learn==1.6.1
+scipy==1.13.1
+seaborn @ file:///C:/b/abs_0bv5x0ucxb/croot/seaborn_1749110315600/work
+Send2Trash==2.1.0
+shellingham==1.5.4
+six @ file:///C:/b/abs_149wuyuo1o/croot/six_1744271521515/work
+soupsieve==2.8.4
+stack-data==0.6.3
+sympy==1.14.0
+tbb==2021.13.1
+terminado==0.18.1
+threadpoolctl==3.6.0
+tinycss2==1.4.0
+tomli==2.4.1
+torch==2.3.0+cu118
+torchdata==0.7.1
+tornado==6.5.7
+tqdm==4.68.4
+traitlets==5.15.1
+typer==0.23.2
+typing-inspection==0.4.2
+typing_extensions==4.16.0
+tzdata==2026.3
+uri-template==1.3.0
+urllib3==2.6.3
+wcwidth==0.8.2
+webcolors==24.11.1
+webencodings==0.5.1
+websocket-client==1.9.0
+widgetsnbextension==4.0.15
+xgboost==2.1.4
+xxhash==3.8.1
+yarl==1.22.0
+zipp @ file:///C:/b/abs_2fcpcg89my/croot/zipp_1732630746332/work

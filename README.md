@@ -53,9 +53,10 @@ Các phát hiện chính từ EDA (xem [`figures/eda/`](figures/eda/)):
 ```
 Hepatic-Model-Comparison/
 ├── data/
-│   ├── raw/            # CSV gốc của cuộc thi (git-ignored)
+│   ├── raw/            # CSV gốc của cuộc thi (đang commit trong repo)
 │   ├── interim/        # đã làm sạch + impute + cờ missing + fold_id
 │   └── processed/      # đã encode + log-transform + scale; X / y / encoders
+│                       # kèm bản *_unscaled.csv (bỏ scaling) cho ablation KNN
 ├── notebooks/
 │   ├── 01_eda.ipynb              # phân tích khám phá dữ liệu       ✅
 │   ├── 02_preprocesing.ipynb     # pipeline raw → interim → processed ✅
@@ -63,21 +64,26 @@ Hepatic-Model-Comparison/
 │   ├── 04_model_track_a.ipynb    # họ mô hình A: KNN + Logistic Regression ✅
 │   ├── 05_model_track_b.ipynb    # họ mô hình B: Decision Tree + Naive Bayes ✅
 │   ├── 06_model_track_c.ipynb    # họ mô hình C: RF + XGBoost (đã tune & freeze) ✅
-│   ├── 07_report_assets.ipynb    # hình/bảng cho báo cáo (dự kiến)   ⬜
-│   └── 08_statistics.ipynb       # kiểm định ý nghĩa (dự kiến)       ⬜
+│   ├── 07_report_assets.ipynb    # hình/bảng cuối cho báo cáo        ✅
+│   └── 08_statistics.ipynb       # kiểm định ý nghĩa + calibration   ✅
 ├── src/                # module dùng chung (import: from src import data, metrics, stats, submission)
 │   ├── __init__.py     # đánh dấu package, re-export hằng số
 │   ├── data.py         # loaders + hằng số dùng chung                         ✅
 │   ├── metrics.py      # log_loss / accuracy / macro-F1 thống nhất            ✅
 │   ├── stats.py        # kiểm định ghép cặp, CI, Bonferroni, calibration      ✅
+│   ├── final_analysis.py # quy trình phân tích cuối: validate, gate, calibration ✅
 │   └── submission.py   # tạo file nộp bài đúng định dạng cuộc thi             ✅
+├── scripts/            # CLI: run_final_analysis.py, smoke_notebook.py, reproduce_all.py
+├── tests/              # unittest cho src/stats.py (chạy: python -m unittest discover -s tests -t .)
 ├── figures/            # hình vẽ, mỗi track/notebook một thư mục con (eda/, model_track_b/, ...)
-├── results/            # điểm mô hình theo fold (scores_track_a/b/c.csv, scores_all.csv)
-├── tables/             # bảng số liệu cho báo cáo (xuất từ 07_report_assets.ipynb)
+├── results/            # điểm mô hình theo fold (scores_track_a/b/c.csv, scores_all.csv, runtime.csv)
+│   └── oof/            # OOF authoritative của XGBoost final + manifest provenance (nguồn cho calibration) ✅
+├── tables/             # bảng số liệu cho báo cáo (xuất từ 07_report_assets.ipynb, kèm bản .tex)
 ├── submissions/        # file nộp Kaggle (ghi bởi src/submission.py, mặc định submission.csv)
-├── report/             # báo cáo LaTeX (template AI CONQUER 2026)
+├── report/             # báo cáo LaTeX (template AI CONQUER 2026) + track_c_provenance_audit.md
 ├── dataset/            # notebook baseline tham khảo của cuộc thi
-├── requirements.txt
+├── requirements.txt      # dependency (pin 5 package quyết định con số)
+├── requirements.lock.txt # pip freeze của env authoritative "dynamic" — bản ghi provenance ✅
 ├── .gitignore
 └── README.md
 ```
@@ -103,7 +109,7 @@ tái lập được:
 ## 6. Bắt đầu
 
 ### Yêu cầu
-- Python 3.9+
+- Python 3.9.18 (bản của env authoritative `dynamic`; bản khác sẽ trượt gate tái tạo)
 - Các file CSV của cuộc thi đặt trong `data/raw/` (không phân phối kèm repo này).
 
 ### Cài đặt
@@ -127,8 +133,30 @@ jupyter lab
 2. `02_preprocesing.ipynb` - dựng `data/interim/` và `data/processed/`.
 3. `03_baseline_models.ipynb` - baseline nhanh 6 model (1 lần train/val), tham khảo trước khi vào track chính thức.
 4. `04_model_track_a.ipynb` / `05_model_track_b.ipynb` / `06_model_track_c.ipynb` - huấn luyện các họ mô hình, mỗi track tune hyperparameter bằng grid/line search trên fold dùng chung rồi **freeze** trước khi ghi `results/scores_track_*.csv` (track C: RF + XGBoost).
-5. `07_report_assets.ipynb` - xuất hình/bảng cuối cho báo cáo.
+5. `07_report_assets.ipynb` - xuất 4 hình (`figures/report/`) và 3 bảng (`tables/report_*.csv|.tex`) cho báo cáo.
 6. `08_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
+
+### 6.1. Kiểm tra tính tái lập
+
+```bash
+# Chỉ đọc, an toàn chạy bất cứ lúc nào: đối chiếu artifact với bản ghi provenance.
+python scripts/reproduce_all.py
+
+# Chạy lại toàn bộ pipeline (notebook 02 -> 06 + mọi phase phân tích) rồi so từng byte
+# với artifact đang có. GHI ĐÈ data/processed và results/.
+python scripts/reproduce_all.py --full
+```
+
+Chế độ `--check` verify: môi trường khớp env authoritative, 8 hash đầu vào khớp manifest, gate tái
+tạo `PASS` 5/5 fold, `scores_all.csv` khớp 3 file track, OOF hợp lệ, và các số calibration khớp nhau
+giữa JSON và CSV.
+
+Đo thời gian huấn luyện/suy luận của 6 mô hình đã freeze (ghi ra `results/runtime.csv`, **không**
+đụng file điểm nào):
+
+```bash
+python scripts/run_final_analysis.py runtime --project-root .
+```
 
 ## 7. Phương pháp luận - so sánh mô hình
 
@@ -161,7 +189,7 @@ Giới hạn phương pháp luận: lựa chọn siêu tham số và đánh giá
 fixed folds, không phải nested cross-validation. Vì vậy score và p-value có thể lạc
 quan, và mọi kết luận suy diễn phải được diễn giải thận trọng.
 
-**Trạng thái HEP-25:** `COMPLETE VIA LEADER-APPROVED POST-RESULT PROTOCOL AMENDMENT`.
+**Trạng thái protocol:** `COMPLETE VIA LEADER-APPROVED POST-RESULT PROTOCOL AMENDMENT`.
 Task lịch sử yêu cầu 10-fold và lựa chọn protocol trước khi xem kết quả; sau khi có
 preliminary results, leader đã sửa protocol cuối thành shared 5-fold và năm phép so
 sánh lấy XGBoost làm reference. Amendment này được phê duyệt nhưng không hồi tố thành
@@ -169,8 +197,8 @@ preregistration; source task được giữ nguyên để bảo toàn lịch s�
 
 ### 7.2. Kết luận thống kê theo primary-test protocol
 
-Kết luận cuối được điều khiển bởi primary test trong HEP-14, không chỉ bởi paired
-*t*-test của HEP-13:
+Kết luận cuối được điều khiển bởi **primary test** (Shapiro-Wilk chọn giữa paired
+*t*-test và Wilcoxon), không chỉ bởi paired *t*-test đơn thuần:
 
 - Có bằng chứng XGBoost có fold-level log loss thấp hơn Random Forest, Decision Tree,
   KNN và Naive Bayes sau Bonferroni correction.
@@ -196,6 +224,12 @@ cách nộp bài — bảo đảm mọi mô hình được so sánh công bằng
 > **Import & môi trường:** luôn import bằng `from src import data, metrics, stats, submission`
 > (chạy từ thư mục gốc dự án hoặc thêm gốc vào `sys.path`). Cần môi trường có `scikit-learn` để
 > đọc các encoder `.pkl` — chạy notebook bằng đúng env đã cài `requirements.txt`.
+>
+> ⚠️ **Tái tạo con số Track C thì PHẢI dùng env authoritative `dynamic`** (Python 3.9.18,
+> xgboost 2.1.4, scikit-learn 1.6.1, numpy 1.26.4, pandas 2.3.3, scipy 1.13.1), đã pin ở
+> [`requirements.lock.txt`](requirements.lock.txt). `requirements.txt` chỉ là lower bound, không
+> phải lock file. Chạy sai env khiến metric lệch tới ~1.7e-2 — đúng cái đã làm phân tích calibration
+> bị chẩn đoán sai là "mất provenance" (xem [report/track_c_provenance_audit.md](report/track_c_provenance_audit.md)).
 
 **`data.py` — nạp dữ liệu + hằng số dùng chung**
 
@@ -284,6 +318,39 @@ submission.make_submission(submission.load_test_ids(), y_proba)  # -> submission
 - [x] Mô hình track A (KNN + Logistic Regression, 5-fold CV)
 - [x] Mô hình track B (Decision Tree + Naive Bayes, tune `max_depth`)
 - [x] Mô hình track C (Random Forest + XGBoost, tune & freeze hyperparameter)
-- [ ] Phân tích ý nghĩa thống kê
-- [ ] Hình/bảng báo cáo + báo cáo LaTeX cuối
+- [x] OOF authoritative của XGBoost final + manifest provenance (gate tái tạo PASS 5/5 fold)
+- [x] Phân tích ý nghĩa thống kê (kiểm định ghép cặp, kiểm tra giả định, Bonferroni)
+- [x] Phân tích calibration mô hình tốt nhất — reliability diagram + ECE
+- [x] Hình/bảng báo cáo (`07_report_assets.ipynb`)
+- [ ] Báo cáo LaTeX cuối
 - [ ] File nộp Kaggle
+
+### P4 — OOF authoritative & phân tích calibration
+
+`results/oof/oof_xgboost_track_c.csv` là **nguồn duy nhất** cho phân tích calibration. Sinh lại bằng
+đúng interpreter của env `dynamic`:
+
+```bash
+C:\Users\ADMIN\miniconda3\envs\dynamic\python.exe scripts/run_final_analysis.py oof-authoritative --project-root .
+```
+
+Kết quả: gate `PASS`, 5/5 fold, sai lệch metric tối đa `5.55e-17` so với `results/scores_track_c.csv`.
+Kèm `oof_xgboost_track_c.manifest.json` chứa `pip freeze`, `get_xgb_params()`,
+`get_booster().save_config()` từng fold, SHA-256 của 8 file đầu vào, ordered feature list, kiểm tra
+chống leakage và metric từng fold tính lại từ OOF.
+
+Chạy phân tích calibration (chỉ chạy được sau khi gate PASS, nếu không sẽ raise `RuntimeError`):
+
+```bash
+C:\Users\ADMIN\miniconda3\envs\dynamic\python.exe scripts/run_final_analysis.py calibration --project-root .
+```
+
+Kết quả cho XGBoost (mô hình log loss thấp nhất): Brier `0.216205`, top-label ECE `0.011651`,
+macro classwise ECE `0.008474` — mô hình hiệu chỉnh tốt. Diễn giải đầy đủ kèm **6 hạn chế phương
+pháp luận** (leakage tiền xử lý, lớp CL quá hiếm, độ nhạy số bin, …) nằm ở
+[report/calibration_analysis.md](report/calibration_analysis.md); hình ở
+`figures/calibration/xgboost_reliability_diagram.png`.
+
+> `results/diagnostics/oof_xgboost_reproduction_attempt.csv` là bản thử **đã bị thay thế**
+> (`SUPERSEDED`), sinh ra từ môi trường sai. Giữ lại làm bằng chứng, **không dùng cho số nào trong
+> báo cáo**.

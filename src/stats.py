@@ -316,38 +316,125 @@ def macro_classwise_ece(
     return float(np.mean(class_eces))
 
 
+# Ba màu đầu của bảng màu categorical đã kiểm định (đạt cả ngưỡng CVD lẫn
+# normal-vision trên toàn bộ cặp). Mỗi lớp còn có marker riêng làm mã hóa phụ, để
+# không phân biệt lớp chỉ bằng màu.
+_CLASS_COLORS = {"C": "#2a78d6", "CL": "#eb6834", "D": "#1baf7a"}
+_CLASS_MARKERS = {"C": "o", "CL": "s", "D": "^"}
+_REFERENCE_GRAY = "#8a8a85"
+_INK_PRIMARY = "#0b0b0b"
+_INK_SECONDARY = "#52514e"
+
+
+def _style_reliability_axis(ax, title, xlabel, ylabel):
+    """Định dạng chung cho panel reliability: lưới mờ, trục vuông, chữ dùng màu ink."""
+    ax.set_title(title, fontsize=11, color=_INK_PRIMARY, pad=10)
+    ax.set_xlabel(xlabel, fontsize=9, color=_INK_SECONDARY)
+    ax.set_ylabel(ylabel, fontsize=9, color=_INK_SECONDARY)
+    # Cố ý KHÔNG dùng aspect="equal": panel reliability phải rộng đúng bằng
+    # histogram bên dưới thì người đọc mới dóng thẳng bin với số mẫu được.
+    ax.set(xlim=(0, 1), ylim=(0, 1))
+    ax.grid(True, linewidth=0.5, color="#e4e4e0", zorder=0)
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color("#d0d0cb")
+    ax.tick_params(labelsize=8, colors=_INK_SECONDARY, length=3)
+
+
+def _plot_count_histogram(ax, edges, counts, colors, xlabel):
+    """Histogram số mẫu mỗi bin, đặt dưới đường cong reliability.
+
+    Không có panel này, người đọc không phân biệt được bin vài nghìn mẫu với bin
+    chỉ vài chục mẫu — trong khi các bin thưa chính là nơi đường cong nhiễu nhất.
+    """
+    width = (edges[1] - edges[0]) * 0.9
+    centers = (edges[:-1] + edges[1:]) / 2
+    if counts.ndim == 1:
+        counts = counts[None, :]
+        colors = [colors] if isinstance(colors, str) else colors
+    n_series = counts.shape[0]
+    sub_width = width / n_series
+    for index in range(n_series):
+        offset = (index - (n_series - 1) / 2) * sub_width
+        ax.bar(centers + offset, counts[index], width=sub_width * 0.88,
+               color=colors[index], linewidth=0, zorder=2)
+    ax.set_xlim(0, 1)
+    ax.set_xlabel(xlabel, fontsize=9, color=_INK_SECONDARY)
+    ax.set_ylabel("Số mẫu", fontsize=9, color=_INK_SECONDARY)
+    ax.grid(True, axis="y", linewidth=0.5, color="#e4e4e0", zorder=0)
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color("#d0d0cb")
+    ax.tick_params(labelsize=8, colors=_INK_SECONDARY, length=3)
+
+
 def plot_reliability_diagram(
     y_true: Sequence[int],
     y_proba: Sequence[Sequence[float]],
     n_bins: int = 10,
     include_classwise: bool = True,
 ):
-    """Create top-label and optional one-vs-rest reliability diagrams."""
+    """Create top-label and optional one-vs-rest reliability diagrams.
+
+    Mỗi panel gồm đường cong reliability (hàng trên) và histogram số mẫu mỗi bin
+    (hàng dưới). Chỉ trả về các axes reliability, không trả axes histogram.
+    """
     top_bins = top_label_reliability_bins(y_true, y_proba, n_bins=n_bins)
     class_bins = classwise_reliability_bins(y_true, y_proba, n_bins=n_bins)
     n_axes = 2 if include_classwise else 1
-    fig, axes = plt.subplots(1, n_axes, figsize=(7 * n_axes, 5), squeeze=False)
-    top_ax = axes[0, 0]
-    top_ax.plot([0, 1], [0, 1], "--", color="gray", label="Perfect calibration")
-    populated = top_bins[top_bins["count"] > 0]
-    top_ax.plot(
-        populated["mean_confidence"], populated["observed_accuracy"], marker="o", label="Top-label"
-    )
-    for row in populated.itertuples():
-        top_ax.annotate(f"n={row.count}", (row.mean_confidence, row.observed_accuracy), fontsize=8)
-    top_ax.set(title=f"Top-label reliability ({n_bins} uniform bins)", xlabel="Mean confidence", ylabel="Accuracy", xlim=(0, 1), ylim=(0, 1))
-    top_ax.legend()
+    edges = np.linspace(0.0, 1.0, n_bins + 1)
 
+    fig = plt.figure(figsize=(6.5 * n_axes, 6.2))
+    grid = fig.add_gridspec(2, n_axes, height_ratios=[3, 1], hspace=0.28, wspace=0.24)
+    reliability_axes = [fig.add_subplot(grid[0, column]) for column in range(n_axes)]
+    # sharex để histogram nằm thẳng cột với đường cong phía trên.
+    histogram_axes = [
+        fig.add_subplot(grid[1, column], sharex=reliability_axes[column])
+        for column in range(n_axes)
+    ]
+
+    # ── Panel 1: top-label ────────────────────────────────────────────────────
+    top_ax = reliability_axes[0]
+    top_ax.plot([0, 1], [0, 1], "--", linewidth=1.5, color=_REFERENCE_GRAY,
+                label="Hiệu chỉnh hoàn hảo", zorder=1)
+    populated = top_bins[top_bins["count"] > 0]
+    top_ax.plot(populated["mean_confidence"], populated["observed_accuracy"],
+                marker="o", markersize=6, linewidth=2, color=_CLASS_COLORS["C"],
+                label="Quan sát được", zorder=3)
+    _style_reliability_axis(top_ax, f"Top-label reliability ({n_bins} bin đều)",
+                            "Confidence trung bình", "Accuracy quan sát được")
+    top_ax.legend(fontsize=8, frameon=False, loc="upper left", labelcolor=_INK_SECONDARY)
+    _plot_count_histogram(histogram_axes[0], edges,
+                          top_bins["count"].to_numpy(), _CLASS_COLORS["C"],
+                          "Confidence")
+
+    # ── Panel 2: one-vs-rest từng lớp ─────────────────────────────────────────
     if include_classwise:
-        class_ax = axes[0, 1]
-        class_ax.plot([0, 1], [0, 1], "--", color="gray", label="Perfect calibration")
+        class_ax = reliability_axes[1]
+        class_ax.plot([0, 1], [0, 1], "--", linewidth=1.5, color=_REFERENCE_GRAY,
+                      label="Hiệu chỉnh hoàn hảo", zorder=1)
         for class_name in CLASS_ORDER:
-            subset = class_bins[(class_bins["class_name"] == class_name) & (class_bins["count"] > 0)]
-            class_ax.plot(subset["mean_probability"], subset["observed_frequency"], marker="o", label=class_name)
-        class_ax.set(title=f"One-vs-rest reliability — class order {', '.join(CLASS_ORDER)}", xlabel="Mean predicted probability", ylabel="Observed frequency", xlim=(0, 1), ylim=(0, 1))
-        class_ax.legend()
-    fig.tight_layout()
-    return fig, axes.ravel()[:n_axes], top_bins, class_bins
+            subset = class_bins[(class_bins["class_name"] == class_name)
+                                & (class_bins["count"] > 0)]
+            class_ax.plot(subset["mean_probability"], subset["observed_frequency"],
+                          marker=_CLASS_MARKERS[class_name], markersize=6, linewidth=2,
+                          color=_CLASS_COLORS[class_name], label=class_name, zorder=3)
+        _style_reliability_axis(class_ax, "Reliability một-với-phần-còn-lại theo lớp",
+                                "Xác suất dự đoán trung bình", "Tần suất quan sát được")
+        class_ax.legend(fontsize=8, frameon=False, loc="upper left", labelcolor=_INK_SECONDARY)
+        class_counts = np.vstack([
+            class_bins.loc[class_bins["class_name"] == name, "count"].to_numpy()
+            for name in CLASS_ORDER
+        ])
+        _plot_count_histogram(histogram_axes[1], edges, class_counts,
+                              [_CLASS_COLORS[name] for name in CLASS_ORDER],
+                              "Xác suất dự đoán")
+
+    return fig, tuple(reliability_axes), top_bins, class_bins
 
 
 # Backward-compatible calibration wrappers used in earlier documentation.
