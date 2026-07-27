@@ -36,6 +36,19 @@ def load_processed():
     return X_train, y_train, X_test
 
 
+def load_processed_unscaled():
+    """Đọc bản KHÔNG scaling của dữ liệu đã tiền xử lý. Trả về (X_train, X_test).
+
+    Giống hệt load_processed() ở mọi bước (impute, log1p, encode, thứ tự cột) trừ
+    một điều: bỏ qua RobustScaler. Dùng cho ablation đo ảnh hưởng của scaling lên
+    các mô hình dựa trên khoảng cách như KNN. Nhãn y dùng chung với load_processed()
+    vì mã hóa nhãn không phụ thuộc scaling.
+    """
+    X_train = pd.read_csv(PROC_DIR / "train_X_unscaled.csv")
+    X_test = pd.read_csv(PROC_DIR / "test_X_unscaled.csv")
+    return X_train, X_test
+
+
 def load_folds():
     """Đọc mã fold dùng chung cho cross-validation (0..N_FOLDS-1) dưới dạng Series.
     Căn khớp theo vị trí với X_train từ load_processed(), nhờ đó mọi mô hình đều
