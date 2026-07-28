@@ -23,12 +23,23 @@ def make_submission(test_ids, y_proba, path=None):
     Kiểm tra mỗi hàng có tổng xác suất ~1 trước khi lưu, để lỗi bị bắt ở đây thay vì
     khi nộp lên hệ thống chấm điểm.
     """
-    y_proba = np.asarray(y_proba)
-    if y_proba.shape[1] != len(SUBMISSION_COLS):
+    test_ids = np.asarray(test_ids)
+    y_proba = np.asarray(y_proba, dtype=float)
+    if y_proba.ndim != 2 or y_proba.shape[1] != len(SUBMISSION_COLS):
         raise ValueError(
-            f"y_proba phải có {len(SUBMISSION_COLS)} cột (thứ tự {CLASS_ORDER}), "
-            f"nhận được {y_proba.shape[1]} cột"
+            f"y_proba phải là ma trận 2 chiều có {len(SUBMISSION_COLS)} cột "
+            f"(thứ tự {CLASS_ORDER}); nhận được shape={y_proba.shape}"
         )
+    if len(test_ids) != len(y_proba):
+        raise ValueError(
+            f"Số id ({len(test_ids)}) không khớp số dòng xác suất ({len(y_proba)})"
+        )
+    if len(np.unique(test_ids)) != len(test_ids):
+        raise ValueError("Cột id chứa giá trị trùng lặp")
+    if not np.isfinite(y_proba).all():
+        raise ValueError("y_proba chứa NaN hoặc giá trị vô hạn")
+    if np.any(y_proba < 0) or np.any(y_proba > 1):
+        raise ValueError("Mọi xác suất phải nằm trong đoạn [0, 1]")
 
     row_sums = y_proba.sum(axis=1)
     if not np.allclose(row_sums, 1.0, atol=1e-3):
@@ -37,7 +48,7 @@ def make_submission(test_ids, y_proba, path=None):
             f"Tổng xác suất khác 1 ở {len(bad_idx)} dòng, ví dụ index {bad_idx[:5].tolist()}"
         )
 
-    submission_df = pd.DataFrame({"id": np.asarray(test_ids)})
+    submission_df = pd.DataFrame({"id": test_ids})
     submission_df[SUBMISSION_COLS] = y_proba
 
     if path is False:
