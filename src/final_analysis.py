@@ -97,6 +97,30 @@ DIAGNOSTIC_VALIDATION = "results/validation/oof_xgboost_validation.json"
 DIAGNOSTIC_PER_FOLD = "results/validation/xgboost_oof_reproduction.csv"
 DIAGNOSTIC_GATE = "results/validation/xgboost_oof_reproduction_gate.json"
 
+# Nhánh diagnostic (authoritative=False) chỉ dùng để chẩn đoán, không sinh ra số
+# nào trong báo cáo. Một tệp gate ghi "FAIL" nằm cạnh artifact đang dùng rất dễ bị
+# đọc nhầm là kết quả hiện hành, nên mọi JSON của nhánh này được gắn kèm nhãn dưới
+# đây. Nhãn nằm trong code chứ không sửa tay vào JSON, vì các dict đó được dựng
+# mới mỗi lần chạy và sẽ ghi đè lên bản sửa tay.
+DIAGNOSTIC_SUPERSEDED_MARKER = {
+    "artifact_status": "SUPERSEDED",
+    "superseded_by": "results/oof/oof_xgboost_track_c.gate.json",
+    "authoritative_result": (
+        "Cổng authoritative đạt PASS 5/5 fold, sai lệch metric tối đa "
+        "5.551115123125783e-17."
+    ),
+    "warning": (
+        "Chỉ là bằng chứng chẩn đoán. Không dùng cho ECE, Brier score, reliability "
+        "diagram hay bất kỳ con số nào được báo cáo."
+    ),
+    "root_cause_if_failed": (
+        "Chạy sai môi trường, không phải mất provenance. Môi trường authoritative "
+        "là conda env 'dynamic' (Python 3.9.18 / xgboost 2.1.4 / scikit-learn "
+        "1.6.1), đã pin trong requirements.lock.txt."
+    ),
+    "see_also": "report/track_c_provenance_audit.md",
+}
+
 # sklearn >= 1.6 cảnh báo vì xgboost trả xác suất float32 (tổng hàng lệch ~1e-7).
 # Không normalize lại: làm vậy sẽ đổi số so với scores_track_c.csv.
 KNOWN_BENIGN_WARNINGS = (
@@ -579,6 +603,7 @@ def reproduce_xgboost_oof(
         }
     )
     if not authoritative:
+        validation.update(DIAGNOSTIC_SUPERSEDED_MARKER)
         _write_json(project_root / DIAGNOSTIC_VALIDATION, validation)
 
     expected = pd.read_csv(project_root / "results" / "scores_track_c.csv")
@@ -612,6 +637,8 @@ def reproduce_xgboost_oof(
         "folds_passed": int(reproduction["within_tolerance"].sum()),
         "folds_total": len(EXPECTED_FOLDS),
     }
+    if not authoritative:
+        gate.update(DIAGNOSTIC_SUPERSEDED_MARKER)
     _write_json(project_root / (AUTHORITATIVE_GATE if authoritative else DIAGNOSTIC_GATE), gate)
 
     if authoritative:

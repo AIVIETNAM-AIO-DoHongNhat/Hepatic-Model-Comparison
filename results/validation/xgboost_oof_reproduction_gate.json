@@ -3,5 +3,11 @@
   "tolerance": 1e-05,
   "max_absolute_metric_difference": 0.016901819109425342,
   "folds_passed": 0,
-  "folds_total": 5
+  "folds_total": 5,
+  "artifact_status": "SUPERSEDED",
+  "superseded_by": "results/oof/oof_xgboost_track_c.gate.json",
+  "authoritative_result": "Cổng authoritative đạt PASS 5/5 fold, sai lệch metric tối đa 5.551115123125783e-17.",
+  "warning": "Chỉ là bằng chứng chẩn đoán. Không dùng cho ECE, Brier score, reliability diagram hay bất kỳ con số nào được báo cáo.",
+  "root_cause_if_failed": "Chạy sai môi trường, không phải mất provenance. Môi trường authoritative là conda env 'dynamic' (Python 3.9.18 / xgboost 2.1.4 / scikit-learn 1.6.1), đã pin trong requirements.lock.txt.",
+  "see_also": "report/track_c_provenance_audit.md"
 }
