@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "rows": 30,
+  "models": [
+    "Decision Tree",
+    "KNN",
+    "Logistic Regression",
+    "Naive Bayes",
+    "Random Forest",
+    "XGBoost"
+  ],
+  "n_models": 6,
+  "folds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "duplicate_model_fold_rows": 0,
+  "errors": [],
+  "output": "results/scores_all.csv",
+  "inputs": [
+    "results/scores_track_a.csv",
+    "results/scores_track_b.csv",
+    "results/scores_track_c.csv"
+  ]
+}

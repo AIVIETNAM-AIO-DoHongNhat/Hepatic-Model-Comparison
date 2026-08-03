@@ -1,0 +1,20 @@
+# Cần Python 3.9.18 — đây là phiên bản của môi trường authoritative "dynamic" đã sinh ra
+# results/scores_track_c.csv và results/oof/oof_xgboost_track_c.csv.
+#
+# 5 package dưới đây được PIN CHÍNH XÁC vì chúng quyết định từng con số của Track C.
+# Một lần tái tạo trước đây chạy trên Python 3.13 / xgboost 3.3 / scikit-learn 1.8 đã lệch
+# metric tới 1.69e-2 và trượt gate ở 5/5 fold — chi tiết trong requirements.lock.txt.
+xgboost==2.1.4
+scikit-learn==1.6.1
+numpy==1.26.4
+pandas==2.3.3
+scipy==1.13.1
+
+# Chỉ dùng để vẽ hình / xuất bảng, không tham gia tính metric nên để bound lỏng.
+# matplotlib của env authoritative là 3.9.2, thấp hơn bound ">=3.9.4" từng ghi ở đây.
+matplotlib>=3.9.2
+seaborn>=0.13.0
+Jinja2>=3.1.6
+
+# requirements.lock.txt là bản pip freeze đầy đủ của env authoritative (bản ghi provenance),
+# không dùng để cài đặt: nhiều dòng ở dạng "@ file:///..." của conda build cục bộ.

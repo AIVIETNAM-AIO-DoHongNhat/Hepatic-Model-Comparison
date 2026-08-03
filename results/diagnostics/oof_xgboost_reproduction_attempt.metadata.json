@@ -1,0 +1,23 @@
+{
+  "status": "SUPERSEDED",
+  "previous_status": "REPRODUCTION_FAILED",
+  "approved_for_calibration": false,
+  "artifact": "results/diagnostics/oof_xgboost_reproduction_attempt.csv",
+  "structural_validation": "PASS",
+  "metric_tolerance": 1e-05,
+  "max_metric_difference": 0.016901819109425342,
+  "matched_folds": 0,
+  "total_folds": 5,
+  "reference_score_file": "results/scores_track_c.csv",
+  "warning": "Diagnostic evidence only. Do not use for final ECE, Brier score, or reliability diagrams.",
+  "superseded_by": "results/oof/oof_xgboost_track_c.csv",
+  "superseded_on": "2026-07-26",
+  "root_cause_of_failure": "Wrong Python environment, not lost provenance. This attempt ran on Python 3.13.3 / xgboost 3.3.0 / scikit-learn 1.8.0. The authoritative Track C kernel is the 'dynamic' conda env (Python 3.9.18 / xgboost 2.1.4 / scikit-learn 1.6.1 / numpy 1.26.4 / pandas 2.3.3 / scipy 1.13.1), now pinned in requirements.lock.txt. Re-running the same code in that env reproduces results/scores_track_c.csv with a maximum absolute metric difference of 5.551115123125783e-17 and passes 5/5 folds.",
+  "retained_as": "Evidence of the failed cross-environment attempt. Kept deliberately so the environment-drift finding stays auditable.",
+  "do_not_use_for": [
+    "calibration ECE",
+    "calibration Brier score",
+    "reliability diagram",
+    "any reported final number"
+  ]
+}

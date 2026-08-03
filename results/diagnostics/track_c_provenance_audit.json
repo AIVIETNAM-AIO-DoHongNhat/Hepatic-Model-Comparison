@@ -1,0 +1,42 @@
+{
+  "verdict": "ROUTE_3_PROVENANCE_NOT_EXACTLY_RECOVERABLE",
+  "authoritative_score_commit": "aa1ce1a7a4f93a6d5cd75533d267efb791375603",
+  "notebook_python_metadata": "3.9.18",
+  "explicit_xgboost_parameters": {
+    "n_estimators": 400,
+    "max_depth": 2,
+    "learning_rate": 0.15,
+    "random_state": 42,
+    "eval_metric": "mlogloss",
+    "n_jobs": -1
+  },
+  "implicit_unfrozen_parameters_include": [
+    "objective",
+    "tree_method",
+    "subsample",
+    "colsample_bytree",
+    "min_child_weight",
+    "gamma",
+    "reg_alpha",
+    "reg_lambda",
+    "base_score"
+  ],
+  "reproduction_gate": {
+    "status": "FAIL",
+    "tolerance": 1e-05,
+    "matched_folds": 0,
+    "total_folds": 5,
+    "max_metric_difference": 0.016901819109425342
+  },
+  "root_cause_confidence": {
+    "missing_exact_environment_and_full_config": "CONFIRMED",
+    "stale_baseline_model_pickles": "CONFIRMED",
+    "score_notebook_data_fold_same_git_state": "CONFIRMED",
+    "score_from_saved_sequential_notebook_run": "HIGHLY_LIKELY",
+    "environment_or_implicit_default_drift_caused_failure": "POSSIBLE",
+    "parallelism_or_platform_nondeterminism": "POSSIBLE",
+    "data_or_fold_mismatch": "UNSUPPORTED",
+    "csv_rounding": "UNSUPPORTED"
+  },
+  "approved_for_calibration": false
+}

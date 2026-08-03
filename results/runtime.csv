@@ -1,0 +1,31 @@
+model,fold,n_train,n_valid,fit_seconds,predict_seconds,log_loss_khop_scores
+XGBoost,0,7680,1920,0.6821,0.0081,True
+XGBoost,1,7680,1920,0.6697,0.0105,True
+XGBoost,2,7680,1920,0.6195,0.0078,True
+XGBoost,3,7680,1920,0.5696,0.0093,True
+XGBoost,4,7680,1920,0.6757,0.0075,True
+Random Forest,0,7680,1920,1.2017,0.1248,True
+Random Forest,1,7680,1920,1.1689,0.1235,True
+Random Forest,2,7680,1920,1.1646,0.1388,True
+Random Forest,3,7680,1920,1.2082,0.1251,True
+Random Forest,4,7680,1920,1.1935,0.1397,True
+Logistic Regression,0,7680,1920,0.1923,0.002,True
+Logistic Regression,1,7680,1920,0.1397,0.0018,True
+Logistic Regression,2,7680,1920,0.1741,0.0018,True
+Logistic Regression,3,7680,1920,0.1545,0.0015,True
+Logistic Regression,4,7680,1920,0.1632,0.0015,True
+Decision Tree,0,7680,1920,0.0263,0.0016,True
+Decision Tree,1,7680,1920,0.0256,0.0015,True
+Decision Tree,2,7680,1920,0.0236,0.0014,True
+Decision Tree,3,7680,1920,0.0238,0.0015,True
+Decision Tree,4,7680,1920,0.023,0.002,True
+KNN,0,7680,1920,0.0028,4.7043,True
+KNN,1,7680,1920,0.0036,0.0374,True
+KNN,2,7680,1920,0.004,0.0368,True
+KNN,3,7680,1920,0.0041,0.0356,True
+KNN,4,7680,1920,0.0039,0.0349,True
+Naive Bayes,0,7680,1920,0.0061,0.0022,True
+Naive Bayes,1,7680,1920,0.0053,0.0019,True
+Naive Bayes,2,7680,1920,0.0057,0.0021,True
+Naive Bayes,3,7680,1920,0.0055,0.002,True
+Naive Bayes,4,7680,1920,0.0054,0.0019,True
