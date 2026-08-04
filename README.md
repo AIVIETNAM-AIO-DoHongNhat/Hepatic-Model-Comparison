@@ -80,7 +80,8 @@ Hepatic-Model-Comparison/
 │   └── oof/            # OOF authoritative của XGBoost final + manifest provenance (nguồn cho calibration) ✅
 ├── tables/             # bảng số liệu cho báo cáo (xuất từ 07_report_assets.ipynb, kèm bản .tex)
 ├── submissions/        # file nộp Kaggle (ghi bởi src/submission.py, mặc định submission.csv)
-├── report/             # báo cáo LaTeX (template AI CONQUER 2026) + track_c_provenance_audit.md
+├── report/             # báo cáo LaTeX: Research_Template_Report.tex/.pdf + 2 ghi chú phân tích .md
+│   └── template/       # bộ template AI CONQUER 2026 (.cls, references.bib, Figures/logo.pdf)
 ├── dataset/            # notebook baseline tham khảo của cuộc thi
 ├── requirements.txt      # dependency (pin 5 package quyết định con số)
 ├── requirements.lock.txt # pip freeze của env authoritative "dynamic" — bản ghi provenance ✅
@@ -133,7 +134,7 @@ jupyter lab
 2. `02_preprocesing.ipynb` - dựng `data/interim/` và `data/processed/`.
 3. `03_baseline_models.ipynb` - baseline nhanh 6 model (1 lần train/val), tham khảo trước khi vào track chính thức.
 4. `04_model_track_a.ipynb` / `05_model_track_b.ipynb` / `06_model_track_c.ipynb` - huấn luyện các họ mô hình, mỗi track tune hyperparameter bằng grid/line search trên fold dùng chung rồi **freeze** trước khi ghi `results/scores_track_*.csv` (track C: RF + XGBoost).
-5. `07_report_assets.ipynb` - xuất 4 hình (`figures/report/`) và 3 bảng (`tables/report_*.csv|.tex`) cho báo cáo.
+5. `07_report_assets.ipynb` - xuất 2 hình (`figures/report/`) và 3 bảng (`tables/report_*.csv|.tex`) cho báo cáo.
 6. `08_statistics.ipynb` - kiểm định ý nghĩa trên `results/scores_all.csv`.
 
 ### 6.1. Kiểm tra tính tái lập

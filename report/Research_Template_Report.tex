@@ -1,0 +1,996 @@
+\documentclass[12pt]{template/ai_conquer2026}
+\addbibresource{template/references.bib}
+\graphicspath{{../figures/}}
+\AIVNSetLogo{template/Figures/logo.pdf}
+
+% Biên dịch từ report/. Phân công nội dung xem Phụ lục D.
+% Thư viện TikZ cho sơ đồ pipeline nghiên cứu ở phần Phương pháp.
+\usetikzlibrary{arrows.meta,positioning,fit,backgrounds}
+
+% Toàn tài liệu dùng dấu gạch nối ngắn. biber ghi \bibrangedash vào .bbl và
+% english.lbx định nghĩa lệnh đó là gạch dài, nên sửa file .bib không có tác dụng.
+% Phải ghi đè trong \AtBeginBibliography: class đã đăng ký \selectlanguage{english}
+% ở cùng hook, mà lệnh chuyển ngôn ngữ sẽ nạp lại định nghĩa gốc từ .lbx; hook
+% đăng ký sau sẽ chạy sau nên giữ được giá trị này.
+\AtBeginBibliography{\renewcommand*{\bibrangedash}{-}}
+
+% Đánh số heading: mục cấp 1 dùng số La Mã (I, II, ...), các cấp dưới dùng số Ả
+% Rập theo dạng 1.1, 1.2. Class gốc định nghĩa \thesubsection dựa trên
+% \thesection nên sinh ra "I.1."; ghi đè ở đây để tách hai hệ số, và đặt trong
+% .tex thay vì .cls để không đổi cách đánh số của các tài liệu khác dùng chung
+% template.
+\renewcommand{\thesubsection}{\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\title{%
+  \begin{center}
+    \Large {AI VIET NAM - AI Conquer 2026}\\[.5ex]
+    \Huge \textbf{So sánh mô hình học máy dự đoán kết cục bệnh nhân gan: suy diễn thống kê, calibration và khả năng tái lập}\\[.5ex]
+    \large Hepatic Risk Outcome Prediction
+  \end{center}
+}
+\posttitle{
+  \author{
+    \begin{minipage}{\textwidth}
+      \centering
+      {\vspace{-1.5em}Trương Trung Tín, Lê Đức Tùng Dương, Đỗ Hồng Nhất, Đinh Văn Anh Khôi, Nguyễn Thị Cẩm Vân}
+    \end{minipage}
+  }
+}
+\date{}
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\href{https://www.facebook.com/aivietnam.edu.vn}{\textcolor{aivnGreen}{\bfseries AI VIET NAM (AI Conquer 2026)}}}
+\rhead{\href{https://aivietnam.edu.vn/}{\textcolor{aivnGreen}{\bfseries aivietnam.edu.vn}}}
+\fancyfoot[C]{\thepage}
+% Biến thể chỉ khác ở chỗ bỏ số trang; header và headrule giữ nguyên vì
+% \fancypagestyle kế thừa thiết lập fancy hiện hành rồi mới ghi đè phần trong ngoặc.
+% Dùng từ mục Tài liệu tham khảo trở đi.
+\fancypagestyle{khongsotrang}{\fancyfoot[C]{}}
+\renewcommand{\headrulewidth}{1.0pt}
+\renewcommand{\headrule}{{\color{aivnGreen}\hrule width\headwidth height\headrulewidth \vskip-\headrulewidth}}
+
+\begin{document}
+% Phần đầu (bìa, tóm tắt, mục lục) đánh số i, ii để thân báo cáo bắt đầu lại từ
+% trang 1 ngay sau mục lục.
+\pagenumbering{roman}
+\maketitle
+\vspace{-5.5em}
+\setlength{\epigraphwidth}{0.6\textwidth}
+
+% Banner trang trí đầu báo cáo. CỐ Ý không đặt trong môi trường figure và không
+% có caption: đây là ảnh minh họa chủ đề, không phải dữ liệu hay kết quả, nên
+% không được đánh số như một Hình của nghiên cứu.
+% Chiều rộng 0.78\linewidth thay vì tràn lề: ảnh gốc chỉ 596x335 px, in hết khổ
+% sẽ còn 89 DPI; ở mức này đạt khoảng 114 DPI và cao 7.5 cm.
+\begin{center}
+\includegraphics[width=0.78\linewidth]{overview/header.jpg}
+\end{center}
+
+% Tóm tắt sang trang riêng: đặt chung trang bìa thì bị tràn 7 dòng sang trang sau,
+% để lại một trang gần trống.
+\newpage
+
+% \section* : tóm tắt không được đánh số và không vào mục lục.
+\section*{Tóm tắt nghiên cứu}
+
+Dự đoán xác suất kết cục của bệnh nhân gan là một bài toán dữ liệu bảng thuộc
+Healthcare AI, trong đó chất lượng xác suất quan trọng không kém độ chính xác phân
+loại. Bài toán gặp hai thách thức chính: nhãn mất cân bằng nghiêm trọng, với lớp
+ghép gan CL chỉ chiếm khoảng 2.6\%, và nhiều đặc trưng lâm sàng, xét nghiệm có tỷ
+lệ thiếu cao. Việc chỉ xếp hạng mô hình theo điểm trung bình chưa cho biết chênh
+lệch có ổn định qua các fold hay xác suất có được calibration tốt hay không.
+Nghiên cứu xây dựng một quy trình có thể tái lập để so sánh KNN, Logistic
+Regression, Decision Tree, Naive Bayes, Random Forest và XGBoost trên 9.600 quan
+sát có nhãn. Sau tiền xử lý, sáu mô hình được đánh giá trên cùng năm fold phân
+tầng bằng log loss, accuracy và macro-F1. Chênh lệch log loss được phân tích bằng
+kiểm định ghép cặp và hiệu chỉnh Bonferroni; mô hình tốt nhất tiếp tục được đánh
+giá calibration trên dự đoán out-of-fold. XGBoost đạt kết quả tốt nhất với log
+loss $0.382\pm0.007$, accuracy $0.850\pm0.006$ và macro-F1 $0.640\pm0.032$.
+Sau hiệu chỉnh, XGBoost tốt hơn Random Forest, Decision Tree, KNN và Naive Bayes;
+với Logistic Regression, bằng chứng chưa đủ theo exact Wilcoxon. XGBoost đạt
+top-label ECE 0.0117 và multiclass Brier score 0.2162. Đóng góp chính của nghiên
+cứu là protocol dùng chung fold, kết hợp đánh giá hiệu năng, suy diễn thống kê,
+calibration và ablation, cùng một cơ chế provenance trong đó cổng tái tạo phải đạt
+trước khi phân tích được phép chạy. Cổng này tái tạo kết quả với sai lệch metric
+tối đa $5.55\times10^{-17}$, đồng thời cho thấy nếu không pin môi trường thì riêng
+phiên bản thư viện đã gây sai lệch cùng bậc độ lớn với hiệu ứng cần đo.
+
+\newpage
+\setcounter{tocdepth}{2}
+\tableofcontents
+\thispagestyle{fancy}
+\newpage
+% Thân báo cáo bắt đầu đánh số lại từ 1.
+\pagenumbering{arabic}
+
+\section{Giới thiệu}
+
+Dự đoán kết cục của bệnh nhân mắc bệnh gan là một bài toán dữ liệu bảng thuộc
+lĩnh vực Healthcare AI. Thông tin sẵn có cho mỗi bệnh nhân không chỉ bao gồm tuổi
+và giới tính mà còn có thời gian theo dõi, chỉ định điều trị, giai đoạn lâm sàng,
+các dấu hiệu như cổ trướng, gan to, phù và sao mạch, cùng nhiều chỉ số xét nghiệm.
+Việc khai thác đồng thời những nguồn thông tin này có thể hỗ trợ mô hình nhận diện
+các mẫu liên quan đến diễn tiến bệnh. Tuy nhiên, kết quả của nghiên cứu này chỉ là
+đánh giá phương pháp học máy trên dữ liệu cuộc thi, không phải công cụ chẩn đoán
+hay khuyến nghị điều trị trong thực hành lâm sàng.
+
+Nhiệm vụ của AIO 2026-1 Hepatic Risk Outcome Prediction yêu cầu mô hình ước lượng
+xác suất cho ba kết cục: bệnh nhân còn sống hoặc bị kiểm duyệt theo dõi (C), bệnh
+nhân được ghép gan và bị kiểm duyệt (CL), hoặc tử vong (D). Đây không đơn thuần là
+bài toán chọn một nhãn. Đầu ra phải là một phân phối xác suất hợp lệ, vì hệ thống
+đánh giá bằng multiclass log loss. Metric này phạt một dự đoán sai theo hàm
+logarit của xác suất gán cho nhãn thực, nên sai với độ tự tin cao tốn kém hơn
+nhiều bậc so với sai nhưng vẫn thể hiện độ bất định. Do đó, nghiên cứu
+cần xem xét đồng thời khả năng phân loại, chất lượng xác suất và calibration.
+
+Bộ dữ liệu đặt ra ba khó khăn chính. Thứ nhất, phân bố nhãn mất cân bằng theo tỷ
+lệ khoảng 26:1 giữa lớp phổ biến nhất và lớp hiếm nhất: lớp C chiếm 67.9\%, lớp D
+chiếm 29.4\%, còn lớp CL chỉ 2.6\%. Một mô hình thiên về lớp phổ biến vẫn có thể
+đạt accuracy cao nhưng hoạt động kém trên lớp hiếm. Thứ hai, nhiều biến lâm sàng
+và xét nghiệm có tỷ lệ thiếu cao, cao nhất là \texttt{Edema\_Status} với hơn 92\%.
+Thứ ba, các chỉ số
+xét nghiệm lệch phải và chênh nhau tới bốn bậc độ lớn về miền giá trị: Albumin
+nằm trong khoảng từ 1.94 đến 4.67, trong khi Alkaline Phosphatase trải từ 8.1 đến
+19053. Vì vậy tiền xử lý ảnh hưởng trực tiếp đến các mô hình
+nhạy với khoảng cách hoặc regularization.
+
+Trong bối cảnh đó, chỉ so sánh điểm trung bình của nhiều mô hình là chưa đủ. Một
+chênh lệch quan sát được có thể xuất phát từ một cách chia train-validation cụ
+thể, trong khi các mô hình lại được đánh giá trên cùng bệnh nhân ở từng fold.
+Nghiên cứu vì vậy tập trung vào phương pháp luận so sánh: dùng cùng năm fold phân tầng,
+tính cùng bộ chỉ số, thực hiện kiểm định ghép cặp trên chênh lệch theo fold, báo
+cáo khoảng tin cậy và kiểm soát sai số do so sánh nhiều mô hình. Ngoài hiệu năng,
+nghiên cứu còn đánh giá calibration của mô hình tốt nhất bằng reliability diagram,
+expected calibration error và Brier score.
+
+Mục tiêu tổng quát của nghiên cứu là xây dựng một quy trình có thể tái lập để so
+sánh sáu họ mô hình - KNN, Logistic Regression, Decision Tree, Naive Bayes,
+Random Forest và XGBoost - trên cùng dữ liệu và cùng protocol. Quy trình bao phủ
+từ phân tích dữ liệu, tiền xử lý, cố định fold, huấn luyện đến đánh giá thống kê
+và calibration. Qua đó, nghiên cứu hướng tới một kết luận thận trọng hơn câu
+hỏi ``mô hình nào có điểm thấp nhất'': kết quả tốt hơn bao nhiêu, có ổn định qua
+fold hay không, xác suất có đáng tin cậy hay không, và toàn bộ kết quả có thể được
+truy vết tới artifact nguồn hay không.
+
+\noindent\textbf{Đóng góp}
+\label{sec:contrib}
+
+Nghiên cứu có năm đóng góp chính:
+
+\begin{itemize}
+\item \textbf{Xây dựng pipeline dữ liệu thống nhất và có thể kiểm tra.} Dữ liệu
+được tổ chức theo ba tầng \texttt{raw}, \texttt{interim} và \texttt{processed};
+pipeline xử lý dữ liệu thiếu, bổ sung cờ missing, encode biến phân loại, biến đổi
+\texttt{log1p} cho biến lệch phải và lưu đồng thời phiên bản có/không scaling.
+
+\item \textbf{Thiết lập protocol so sánh công bằng cho sáu mô hình.} Năm fold
+phân tầng với seed 42 được tạo một lần và dùng chung cho mọi model track. Nhờ đó,
+điểm của các mô hình được ghép đúng theo cùng fold, tránh việc so sánh các kết quả
+đến từ những lần chia dữ liệu khác nhau.
+
+\item \textbf{Đánh giá thực nghiệm đa chiều.} Sáu mô hình thuộc ba track được so
+sánh bằng log loss, accuracy và macro-F1. Nghiên cứu bổ sung ablation về ảnh hưởng
+của scaling đối với KNN và Logistic Regression, đồng thời phân tích sự khác biệt
+giữa cây đơn không regularization, cây giới hạn độ sâu, Random Forest và XGBoost.
+
+\item \textbf{Bổ sung tầng suy diễn thống kê và calibration.} Chênh lệch log loss
+được phân tích bằng kiểm định ghép cặp, Shapiro-Wilk, exact Wilcoxon khi giả định
+chuẩn không phù hợp, khoảng tin cậy và hiệu chỉnh Bonferroni cho năm phép so sánh.
+Mô hình tốt nhất còn được đánh giá bằng top-label ECE, classwise ECE, Brier score
+và phân tích độ nhạy theo số bin.
+
+\item \textbf{Thiết lập provenance có thể kiểm chứng và cổng tái tạo chặn cứng.}
+Thay vì chỉ tuyên bố kết quả tái lập được, nghiên cứu ràng buộc điều đó bằng cơ
+chế thực thi. Môi trường được pin đầy đủ trong \texttt{requirements.lock.txt}
+(160 package); manifest chụp lại hash SHA-256 của tám tệp đầu vào cùng cấu hình
+booster đầy đủ của từng fold, qua đó cố định cả những siêu tham số mặc định không
+được khai báo tường minh trong mã. Một cổng tái tạo so từng metric với dung sai
+$10^{-5}$ và \emph{chặn} phân tích calibration bằng lỗi thực thi cho tới khi cổng
+đạt. Phần~\ref{sec:repro} trình bày kết quả áp dụng cơ chế này.
+\end{itemize}
+
+\section{Nghiên cứu liên quan}
+
+\subsection{Dự đoán tiên lượng bệnh gan}
+
+Nghiên cứu tiên lượng bệnh gan có lịch sử lâu hơn các benchmark phân loại hiện
+đại. Dickson và cộng sự xây dựng mô hình Cox từ dữ liệu bệnh nhân xơ gan mật
+nguyên phát tại Mayo Clinic, sử dụng tuổi, bilirubin, albumin, thời gian
+prothrombin và mức độ phù để dự đoán sống còn. Mô hình được kiểm tra trên một tập
+bệnh nhân độc lập và có ưu điểm không yêu cầu sinh thiết gan
+\cite{dickson1989prognosis}. Công trình này cho thấy các biến lâm sàng và xét
+nghiệm dạng bảng có thể mang tín hiệu tiên lượng hữu ích, đồng thời nhấn mạnh vai
+trò của đánh giá ngoài mẫu.
+
+Một benchmark liên quan trực tiếp là Cirrhosis Patient Survival Prediction trong
+UCI Machine Learning Repository. Bộ dữ liệu có 418 bệnh nhân, 17 đặc trưng và ba
+trạng thái D, C, CL; dữ liệu bắt nguồn từ nghiên cứu Mayo Clinic giai đoạn
+1974-1984 \cite{dickson1989uci}. Bộ dữ liệu của cuộc thi hiện tại có cấu trúc biến
+và định nghĩa nhãn tương tự. Gói dữ liệu hiện có gồm 9.600 quan sát train, 2.400
+quan sát validation riêng và 10.000 quan sát test.
+Do ban tổ chức không cung cấp trong repo một tài liệu mô tả chính thức về quy trình
+mở rộng dữ liệu, nghiên cứu này không giả định rằng hai bộ dữ liệu hoàn toàn giống
+nhau và không dùng kết quả trên UCI làm benchmark số trực tiếp.
+
+\subsection{Các mô hình học máy truyền thống}
+
+Các phương pháp truyền thống cung cấp những baseline với giả định khác nhau.
+Logistic Regression mô hình hóa log-odds tuyến tính, huấn luyện nhanh và tạo xác
+suất trực tiếp, nhưng có thể bỏ sót quan hệ phi tuyến hoặc tương tác phức tạp. KNN
+không giả định dạng hàm và tận dụng cấu trúc cục bộ, song nhạy với scaling, nhiễu,
+chiều dữ liệu và lựa chọn số láng giềng. Naive Bayes có chi phí thấp nhưng giả định
+độc lập có điều kiện thường không phù hợp hoàn toàn với các chỉ số xét nghiệm có
+tương quan. Decision Tree dễ diễn giải và học được ngưỡng phi tuyến, nhưng cây sâu
+có phương sai lớn và thường tạo xác suất 0 hoặc 1 ở các lá ít mẫu, điều đặc biệt
+bất lợi khi metric là log loss.
+
+Bốn baseline này được giữ lại ngay cả khi ensemble cho kết quả cao hơn, vì mỗi mô
+hình vi phạm một giả định khác nhau và nhờ đó khoanh vùng được nguyên nhân của
+chênh lệch quan sát được.
+
+\subsection{Ensemble cây và mô hình hiện đại cho dữ liệu bảng}
+
+Random Forest kết hợp nhiều cây được huấn luyện trên bootstrap samples và sử dụng
+ngẫu nhiên đặc trưng tại mỗi nút. Breiman chỉ ra rằng sai số tổng quát phụ thuộc
+vào sức mạnh của từng cây và tương quan giữa chúng; việc averaging giúp mô hình
+ổn định hơn cây đơn và tương đối bền vững trước nhiễu \cite{breiman2001random}.
+Hạn chế của Random Forest là nhiều cây có thể làm tăng chi phí suy luận, còn xác
+suất trung bình không mặc nhiên bảo đảm calibration tối ưu.
+
+XGBoost xây dựng cây tuần tự để sửa sai của ensemble hiện tại, kết hợp regularized
+objective, shrinkage, subsampling và các tối ưu cho dữ liệu thưa. Công trình gốc
+mô tả một hệ thống tree boosting có khả năng mở rộng, kèm thuật toán nhận biết
+tính thưa và cơ chế weighted quantile sketch cho việc học cây xấp xỉ
+\cite{chen2016xgboost}. Với dữ liệu bảng có quan hệ phi
+tuyến, tương tác và missingness, gradient-boosted trees thường là ứng viên phù hợp;
+tuy nhiên, hiệu năng phụ thuộc vào siêu tham số và việc dùng cùng fold để tuning
+và đánh giá có thể tạo selection bias.
+
+Các kiến trúc deep learning nằm ngoài phạm vi nghiên cứu. Dữ liệu ở đây là bảng
+kích thước vừa, không chứa ảnh, văn bản hay tín hiệu tuần tự cần representation
+learning; thêm mạng sâu mà không có protocol tuning tương xứng sẽ mở rộng không
+gian thử nghiệm mà không phục vụ câu hỏi nghiên cứu.
+
+\subsection{Đánh giá xác suất và so sánh thống kê}
+
+Accuracy chỉ đánh giá lớp có xác suất lớn nhất và không phân biệt dự đoán đúng với
+độ tự tin 0.51 hay 0.99. Log loss và Brier score đánh giá toàn bộ phân phối xác
+suất; Brier score bắt nguồn từ nghiên cứu về kiểm chứng dự báo xác suất
+\cite{brier1950verification}. Reliability diagram và ECE đo khoảng cách giữa mức
+confidence và tần suất đúng quan sát được. Guo và cộng sự cho thấy mô hình có
+accuracy tốt vẫn có thể calibration kém và temperature scaling là một baseline
+hậu xử lý hiệu quả trong nhiều thiết lập \cite{guo2017calibration}. Dù công trình
+đó tập trung vào mạng nơ-ron, kết luận khái quát rằng hiệu năng phân loại và
+calibration là hai khía cạnh khác nhau vẫn phù hợp với nghiên cứu này.
+
+So sánh nhiều mô hình cũng làm phát sinh nguy cơ kết luận dương tính giả nếu thực
+hiện nhiều kiểm định mà không hiệu chỉnh. Demšar tổng hợp các phương pháp so sánh
+classifier và khuyến nghị các kiểm định phi tham số như Wilcoxon trong những thiết
+lập phù hợp, đồng thời nhấn mạnh vấn đề multiple comparisons
+\cite{demsar2006statistical}. Nghiên cứu kế thừa nguyên tắc kiểm định ghép cặp và kiểm
+soát family-wise error, nhưng chỉ có năm fold trên một dataset; vì vậy độ phân giải
+của kiểm định thấp và các fold không thể được xem như năm dataset độc lập.
+
+\subsection{Khoảng trống và định vị nghiên cứu}
+
+Các công trình trên xác lập rằng dữ liệu bảng lâm sàng mang tín hiệu tiên lượng,
+rằng ensemble cây thường mạnh trên loại dữ liệu này, và rằng chất lượng xác suất
+phải được đo tách khỏi accuracy. Điều còn thiếu là một so sánh trong đó cả ba nhận
+định đó được kiểm chứng đồng thời trên cùng một phân hoạch dữ liệu: xếp hạng sáu
+họ mô hình theo mean log loss không cho biết chênh lệch có nhất quán qua fold và
+có sống sót sau hiệu chỉnh so sánh bội hay không, cũng không cho biết xác suất của
+mô hình đứng đầu có đáng tin hay không.
+
+Nghiên cứu này không đề xuất kiến trúc mới. Đóng góp nằm ở protocol: một phân
+hoạch dùng chung cho phép ghép cặp kết quả, kèm tầng suy diễn thống kê, phân tích
+calibration và cơ chế provenance mô tả ở Mục~\ref{sec:contrib}. Bốn khoảng trống
+vừa nêu được chuyển thành RQ1-RQ4 ở phần tiếp theo.
+
+\section{Bài toán nghiên cứu}
+
+\subsection{Định nghĩa input và output}
+
+Bài toán là phân loại đa lớp trên dữ liệu bảng. Gọi $\mathbf{x}_i\in\mathcal{X}$
+là vector đặc trưng của bệnh nhân thứ $i$, hình thành từ bốn nhóm thông tin: nhân
+khẩu học; thời gian theo dõi, điều trị và giai đoạn lâm sàng; dấu hiệu lâm sàng;
+và chỉ số xét nghiệm. Cột \texttt{id} chỉ dùng để định danh, không tham gia làm
+đặc trưng. Nhãn đích là $y_i\in\mathcal{Y}=\{C,CL,D\}$, tương ứng với còn sống
+hoặc bị kiểm duyệt theo dõi, được ghép gan và bị kiểm duyệt, và tử vong.
+
+Mô hình $f_{\theta}:\mathcal{X}\rightarrow\Delta^2$ ánh xạ mỗi bệnh nhân thành
+một vector xác suất
+\[
+\hat{\mathbf p}_i=f_{\theta}(\mathbf{x}_i)
+=(\hat p_{i,C},\hat p_{i,CL},\hat p_{i,D}),
+\]
+trong đó $0\leq\hat p_{i,k}\leq1$ và
+$\hat p_{i,C}+\hat p_{i,CL}+\hat p_{i,D}=1$. Thứ tự ba lớp phải được giữ cố định
+xuyên suốt quá trình encode nhãn, gọi \texttt{predict\_proba} và tính metric; một
+hoán vị cột không bị phát hiện sẽ làm sai lệch toàn bộ log loss mà không gây lỗi
+chạy.
+
+\subsection{Mục tiêu tối ưu và tiêu chí đánh giá}
+
+Metric chính là multiclass log loss:
+\[
+\mathcal L=-\frac{1}{N}\sum_{i=1}^{N}
+\sum_{k\in\{C,CL,D\}}y_{ik}\log(\hat p_{i,k}),
+\]
+trong đó $y_{ik}=1$ nếu quan sát $i$ thuộc lớp $k$ và bằng 0 trong các trường hợp
+còn lại. Log loss càng thấp càng tốt. Do logarit phân kỳ khi xác suất tiến về 0,
+đóng góp của một quan sát vào tổng không bị chặn trên. Đặc tính này khiến các mô
+hình sinh xác suất cực đoan, như cây đơn quá sâu hoặc KNN với ít láng giềng, chịu
+log loss cao hơn nhiều so với mức mà accuracy của chúng gợi ý.
+
+Accuracy được báo cáo để thể hiện tỷ lệ dự đoán đúng theo lớp có xác suất cao nhất.
+Macro-F1 tính F1 riêng cho từng lớp rồi lấy trung bình không trọng số, nhờ đó phản
+ánh tốt hơn hiệu năng trên lớp CL hiếm. Hai chỉ số này là metric bổ trợ; quyết định
+mô hình cuối vẫn dựa trước hết vào log loss. Với mô hình có log loss thấp nhất,
+nghiên cứu tiếp tục đánh giá calibration bằng ECE và Brier score để phân biệt giữa
+khả năng xếp đúng lớp và độ tin cậy của xác suất.
+
+\subsection{Câu hỏi và giả thuyết nghiên cứu}
+
+\begin{itemize}
+\item \textbf{RQ1:} Trong sáu mô hình được khảo sát, mô hình nào đạt mean 5-fold
+log loss thấp nhất, đồng thời duy trì accuracy và macro-F1 cạnh tranh?
+\item \textbf{RQ2:} Chênh lệch log loss giữa mô hình đứng đầu và từng comparator
+có đủ bằng chứng thống kê sau khi kiểm tra giả định và hiệu chỉnh năm phép so sánh
+hay không?
+\item \textbf{RQ3:} Scaling ảnh hưởng như thế nào đến KNN và Logistic Regression,
+và regularization và ensemble ảnh hưởng như thế nào đến độ cực đoan của xác suất cây?
+\item \textbf{RQ4:} Xác suất out-of-fold của mô hình tốt nhất có calibration tốt
+không, và kết luận ECE có ổn định khi thay đổi số bin hay không?
+\end{itemize}
+
+\begin{aivncodebox}[Giả thuyết nghiên cứu]
+H1 ứng với RQ1: Trong sáu mô hình khảo sát, gradient boosting có regularization
+đạt mean 5-fold log loss thấp nhất mà không phải đánh đổi accuracy hay macro-F1.
+
+H2 ứng với RQ2: Chênh lệch log loss giữa mô hình đứng đầu và từng comparator đủ
+lớn và đủ nhất quán qua năm fold để vượt ngưỡng ý nghĩa sau hiệu chỉnh Bonferroni.
+
+H3 ứng với RQ3: Scaling cải thiện KNN vì khoảng cách Euclid không còn bị chi phối
+bởi đặc trưng có miền giá trị lớn; với cây, regularization độ sâu và ensemble hạ
+log loss chủ yếu bằng cách loại bỏ xác suất bằng 0 gán cho lớp đúng, chứ không
+bằng cách hạ thấp mức độ tự tin nói chung.
+
+H4 ứng với RQ4: Xác suất out-of-fold của mô hình có log loss thấp nhất có sai lệch
+calibration nhỏ, và kết luận ECE ổn định khi thay đổi số bin.
+\end{aivncodebox}
+
+Mỗi câu hỏi nghiên cứu gắn với đúng một giả thuyết cùng số thứ tự. H3 có hai vế
+vì RQ3 hỏi về hai họ mô hình khác nhau. Cả bốn giả thuyết được đánh giá hoàn toàn
+trên validation 5-fold nội bộ. Protocol được chốt trước khi hợp nhất bảng điểm và
+không được điều chỉnh hồi tố theo kết quả quan sát.
+
+\section{Phương pháp nghiên cứu}
+
+Nghiên cứu không đề xuất kiến trúc mô hình mới; thành phần được thiết kế là
+\textbf{protocol so sánh}. Hình~\ref{fig:pipeline} mô tả pipeline nghiên cứu và
+chỉ rõ vị trí của thành phần đó: khối \emph{shared 5-fold} nằm giữa tiền xử lý và
+huấn luyện, buộc mọi mô hình nhận đúng cùng một phân hoạch dữ liệu. Nhờ vậy, năm
+điểm log loss của hai mô hình bất kỳ tạo thành các cặp ghép hợp lệ, cho phép kiểm
+định ghép cặp thay vì chỉ so sánh trung bình rời rạc.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  node distance=5mm,
+  font=\small,
+  box/.style={draw=aivnGreen!70!black, fill=aivnGreen!8, rounded corners=2pt,
+              minimum height=8mm, inner xsep=3mm, align=center},
+  key/.style={draw=aivnGreen, fill=aivnGreen!25, very thick, rounded corners=2pt,
+              minimum height=8mm, inner xsep=3mm, align=center},
+  ar/.style={-{Stealth[length=2mm]}, draw=aivnGreen!70!black, thick}
+]
+\node[box] (raw) {\texttt{raw}\\CSV gốc};
+\node[box, right=of raw] (interim) {\texttt{interim}\\cờ thiếu, median};
+\node[box, right=of interim] (proc) {\texttt{processed}\\\texttt{log1p}, encode, scale\\31 đặc trưng};
+\node[key, below=8mm of interim] (fold) {Shared Stratified 5-Fold (seed 42)};
+\node[box, below=8mm of fold, xshift=-32mm] (train) {Huấn luyện\\6 mô hình $\times$ 5 fold};
+\node[box, right=6mm of train] (eval) {Đánh giá\\log loss, acc, macro-F1};
+\node[box, right=6mm of eval] (stat) {Suy diễn\\ghép cặp + Bonferroni};
+\node[box, below=8mm of eval, xshift=-20mm] (calib) {Calibration OOF\\ECE, Brier};
+\node[box, right=6mm of calib] (abl) {Ablation\\scaling, độ sâu cây};
+\draw[ar] (raw) -- (interim);
+\draw[ar] (interim) -- (proc);
+\draw[ar] (proc.south) -- ++(0,-4mm) -| (fold.north);
+\draw[ar] (fold.south) -- ++(0,-4mm) -| (train.north);
+\draw[ar] (train) -- (eval);
+\draw[ar] (eval) -- (stat);
+\draw[ar] (eval.south) -- ++(0,-4mm) -| (calib.north);
+\draw[ar] (calib) -- (abl);
+\end{tikzpicture}
+\caption{Pipeline nghiên cứu. Khối tô đậm là thành phần phương pháp luận được
+khảo sát: một phân hoạch 5-fold cố định dùng chung cho toàn bộ sáu mô hình, tạo
+điều kiện cho suy diễn thống kê ghép cặp ở Bảng~\ref{tab:stats}.}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{Pipeline dữ liệu}
+
+Quy trình được tổ chức theo ba tầng
+\texttt{raw $\rightarrow$ interim $\rightarrow$ processed}. Tầng raw giữ nguyên
+CSV do ban tổ chức cung cấp. Ở tầng interim, \texttt{Patient\_Age\_Days} được
+chuyển thành tuổi theo năm; \texttt{Edema\_Status} bị loại do thiếu 92.01\% nhưng
+vẫn giữ một cờ biểu thị missingness; các biến có tỷ lệ thiếu cao được bổ sung cờ
+thiếu tương ứng. Biến số được điền bằng median tính trên train; biến
+phân loại thiếu được gán nhãn \texttt{Unknown}. ID và fold ID không được đưa vào
+tập đặc trưng.
+
+Ở tầng processed, sáu biến lệch phải gồm Bilirubin, Cholesterol, Copper, Alkaline
+Phosphatase, AST và Triglyceride được biến đổi \texttt{log1p}. Tỷ lệ
+Bilirubin/Albumin được bổ sung như một đặc trưng dẫn xuất và cũng qua
+\texttt{log1p}. Các biến phân loại được mã hóa
+bằng \texttt{OrdinalEncoder}; giá trị chưa từng thấy ở test nhận mã $-1$. Đặc
+trưng số được scale bằng \texttt{RobustScaler}, phù hợp hơn StandardScaler khi có
+outlier. Pipeline tạo 31 đặc trưng cuối cùng và lưu thêm một phiên bản không scale
+có cùng cột, cùng encoding và cùng biến đổi để thực hiện ablation.
+
+Một giới hạn cần công khai là median, encoder và scaler hiện được fit một lần trên
+toàn bộ 9.600 dòng train trước khi chạy cross-validation, thay vì được fit riêng
+trong từng training fold. Cách làm này không dùng nhãn validation nhưng vẫn cho
+phép thống kê phân phối của validation đi vào tiền xử lý, tạo leakage nhẹ và có
+thể làm score hoặc calibration lạc quan. Báo cáo giữ nguyên artifact đã freeze và
+đưa vấn đề này vào phần hạn chế; phiên bản tiếp theo cần dùng
+\texttt{Pipeline}/\texttt{ColumnTransformer} bên trong từng fold.
+
+\subsection{Thiết kế validation dùng chung}
+
+Phân hoạch Stratified 5-Fold được sinh với \texttt{shuffle=True} và seed 42, sau
+đó lưu cố định tại \texttt{data/\allowbreak interim/\allowbreak fold\_id.csv}. Mỗi fold có 1.920 mẫu; fold 0 gồm
+1.305 C, 50 CL và 565 D, còn mỗi fold 1-4 gồm 1.304 C, 51 CL và 565 D. Toàn bộ
+9.600 ID train là duy nhất. Mọi model track dùng cùng fold ID và huấn luyện lại
+mô hình từ đầu ở mỗi fold; điều này tạo các cặp điểm hợp lệ cho so sánh thống kê.
+Không có oversampling, class weighting hay dữ liệu test trong quá trình đánh giá.
+
+\subsection{Các mô hình và quy tắc chọn cấu hình}
+
+\subsubsection{Track A: KNN và Logistic Regression}
+
+KNN được quét \texttt{n\_neighbors} trong
+$\{3,5,7,9,11,15,21,31,41,51\}$ trên shared 5-fold và chọn theo mean log loss;
+$k=51$ là cấu hình tốt nhất. Các tham số còn lại dùng mặc định của
+scikit-learn: uniform weights và khoảng cách Minkowski với $p=2$ (Euclid).
+Logistic Regression dùng regularization L2 mặc định, $C=1$, solver mặc định
+\texttt{lbfgs}, \texttt{max\_iter=1000} và seed 42. Cả hai nhận bản dữ liệu đã
+scale. Bản không scale chỉ dùng cho ablation và không tham gia bảng xếp hạng cuối.
+
+\subsubsection{Track B: Decision Tree và Naive Bayes}
+
+Decision Tree được quét \texttt{max\_depth} trong
+$\{2,3,4,5,6,8,10,12,15,20,\mathrm{None}\}$ và chọn độ sâu 3 theo mean log loss.
+Mô hình dùng criterion Gini, \texttt{min\_samples\_leaf=1} và seed 42. Baseline
+thứ hai là \texttt{GaussianNB} với \texttt{var\_smoothing=$10^{-9}$} mặc định.
+Project không clip xác suất ở tầng metric; \texttt{sklearn.log\_loss} tự bảo vệ
+phép log ở machine epsilon. Quyết định này giúp ablation phản ánh đúng hậu quả của
+xác suất 0 do cây không giới hạn độ sâu.
+
+\subsubsection{Track C: Random Forest và XGBoost}
+
+Cả hai mô hình được grid search trên số cây và độ sâu; riêng XGBoost quét thêm
+learning rate. Cấu hình chốt là Random Forest 600 cây độ sâu 14, và XGBoost 400
+cây độ sâu 2 với learning rate 0.15 - tức một ensemble sâu, ít cây so với một
+ensemble nông, nhiều cây. Không gian quét đầy đủ xem Bảng~\ref{tab:hyperparams}.
+Nghiên cứu không dùng early stopping và không dùng class weights, để chênh lệch
+giữa hai mô hình phản ánh cơ chế bagging so với boosting chứ không phản ánh mức
+độ can thiệp vào lớp hiếm. Sau khi freeze, hai mô hình được chạy lại trên cùng
+năm fold để tạo bảng điểm cuối và OOF prediction.
+
+\subsection{Phân tích thống kê và calibration}
+
+XGBoost được chọn làm mô hình tham chiếu sau khi có mean log loss thấp nhất. Với
+mỗi comparator, năm chênh lệch ghép cặp được tính theo
+$d_j=\mathcal L_{\mathrm{XGB},j}-\mathcal L_{\mathrm{comp},j}$, trong đó $d_j<0$
+nghiêng về XGBoost. Shapiro-Wilk
+được dùng như cổng chọn primary test: paired t-test nếu $p\geq0.05$, exact
+Wilcoxon hai phía nếu $p<0.05$. Năm phép so sánh được hiệu chỉnh Bonferroni với
+family-wise $\alpha=0.05$, nên adjusted alpha là 0.01. T-based 95\% CI được báo
+cáo như đại lượng mô tả cho chênh lệch trung bình; kết luận chính dựa trên primary
+test. Với XGBoost, OOF prediction chỉ được dùng cho calibration sau khi cổng tái
+tạo xác nhận metric khớp score theo cả năm fold. Calibration được mô tả bằng
+reliability diagram, top-label ECE, macro classwise ECE, multiclass Brier score và
+phân tích độ nhạy với 5, 10, 15, 20 bins.
+
+\section{Dữ liệu và thiết kế thí nghiệm}
+
+\subsection{Dataset và chia dữ liệu}
+
+Gói dữ liệu gồm \texttt{aio26\_train.csv} (9.600 dòng, 18 đặc trưng, ID và nhãn),
+\texttt{aio26\_val.csv} (2.400 dòng có nhãn), \texttt{aio26\_test.csv} (10.000
+dòng không nhãn). Phân tích chính và toàn bộ bảng so sánh
+thống kê trong báo cáo được tạo từ 9.600 dòng train trên shared 5-fold; file val
+riêng không được gộp vào các điểm này. Tập test không có nhãn nên không tham gia
+tuning hay đánh giá ở bất kỳ bước nào của nghiên cứu.
+
+Trong train, C có 6.521 mẫu (67.93\%), D có 2.825 mẫu (29.43\%) và CL có 254 mẫu
+(2.65\%). Mỗi lượt huấn luyện dùng 7.680 mẫu và đánh giá trên 1.920 mẫu còn lại.
+
+\begin{figure}[H]
+\centering\includegraphics[width=.92\linewidth]{eda/fig1_overview_dashboard.png}
+\caption{Tổng quan kích thước, phân bố nhãn và tỷ lệ thiếu trên tập train 9.600 mẫu.}
+\label{fig:eda}
+\end{figure}
+
+Hình~\ref{fig:eda} tổng hợp ba đặc điểm chi phối thiết kế thí nghiệm: quy mô dữ
+liệu, mức mất cân bằng nhãn và tỷ lệ thiếu theo biến. EDA cho thấy
+\texttt{Edema\_Status} thiếu 92.01\%, Triglyceride và Cholesterol
+thiếu lần lượt 55.66\% và 55.35\%; nhiều biến điều trị, dấu hiệu và xét nghiệm
+thiếu khoảng 43\%. Bilirubin, Alkaline Phosphatase, Copper, Cholesterol và một số
+xét nghiệm khác có phân phối lệch phải, với trung bình lớn hơn trung vị và đuôi
+phải kéo dài. So sánh histogram mật độ của tám biến chính giữa
+train và test không cho thấy dịch chuyển phân phối nổi bật bằng quan sát trực quan.
+Tuy nhiên, notebook chưa thực hiện một kiểm định drift định lượng hoặc đặt ngưỡng
+phát hiện trước, nên kết quả này chỉ là chẩn đoán EDA, không phải bằng chứng rằng
+hai phân phối hoàn toàn giống nhau.
+
+\subsection{Thiết lập huấn luyện và đánh giá}
+
+Môi trường authoritative được ghi trong \texttt{requirements.lock.txt}: Python
+3.9.18, XGBoost 2.1.4, scikit-learn 1.6.1, NumPy 1.26.4, pandas 2.3.3, SciPy
+1.13.1 và Matplotlib 3.9.2. Seed thống nhất là 42. Notebook không ghi model CPU,
+RAM hoặc GPU, vì vậy runtime chỉ mô tả lần chạy hiện tại và không được diễn giải
+như benchmark phần cứng.
+
+Mỗi mô hình được clone và fit lại từ đầu trên từng training fold. Hàm metric dùng
+cùng thứ tự nhãn $[0,1,2]$ để tránh lỗi khi lớp hiếm ít xuất hiện. Log loss là
+metric chọn cấu hình và xếp hạng; accuracy và macro-F1 được báo cáo bổ sung. Kết
+quả cuối gồm $6\times5=30$ dòng score. Runtime được đo riêng cho fit và
+\texttt{predict\_proba}; mọi dòng đều có cờ xác nhận log loss khớp bảng score.
+
+Quy trình tuning chọn siêu tham số bằng mean log loss trên chính shared folds rồi
+báo cáo hiệu năng trên cùng folds. Đây là một grid-search CV nhất quán giữa mô
+hình nhưng không phải nested CV; do đó kết quả có thể lạc quan. Sau khi chọn,
+tham số được freeze trước khi hợp nhất bảng score và chạy phân tích thống kê.
+
+\section{Kết quả thí nghiệm}
+\label{sec:results}
+
+\begin{table}[H]
+\centering
+\caption{Hiệu năng 5-fold (trung bình $\pm$ độ lệch chuẩn).}
+\label{tab:models}
+\begin{tabular}{lccc}\toprule
+Mô hình & Log loss $\downarrow$ & Accuracy $\uparrow$ & Macro-F1 $\uparrow$\\\midrule
+XGBoost & $0.382\pm0.007$ & $0.850\pm0.006$ & $0.640\pm0.032$\\
+Random Forest & $0.406\pm0.006$ & $0.848\pm0.007$ & $0.569\pm0.008$\\
+Logistic Regression & $0.441\pm0.009$ & $0.833\pm0.005$ & $0.558\pm0.014$\\
+Decision Tree & $0.474\pm0.011$ & $0.830\pm0.007$ & $0.529\pm0.008$\\
+KNN & $0.660\pm0.055$ & $0.814\pm0.009$ & $0.515\pm0.010$\\
+Naive Bayes & $2.211\pm0.217$ & $0.589\pm0.030$ & $0.466\pm0.019$\\\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering\includegraphics[width=.92\linewidth]{report/fig1_logloss_by_fold.png}
+\caption{Phân bố log loss của sáu mô hình trên cùng năm fold; mỗi chấm là một
+fold. Trục y bị ngắt ở khoảng 0.8--1.8 vì không có quan sát nào rơi vào đó.}
+\label{fig:folds}
+\end{figure}
+
+Bảng~\ref{tab:models} và Hình~\ref{fig:folds} trình bày hiệu năng 5-fold của sáu
+mô hình trên cùng bộ fold. XGBoost đứng đầu trên cả ba giá trị trung bình. So với Random Forest, log loss giảm
+từ 0.406 xuống 0.382 trong khi accuracy chỉ tăng khoảng 0.002; phần cải thiện rõ
+hơn nằm ở macro-F1, tăng từ 0.569 lên 0.640. Điều này đặc biệt đáng chú ý trong bối
+cảnh lớp CL hiếm, nhưng chưa đủ để kết luận chất lượng riêng của lớp CL nếu không
+xem thêm confusion matrix và các chỉ số theo lớp. Logistic Regression đứng thứ ba
+về log loss (0.441), cho thấy baseline tuyến tính vẫn cạnh tranh. KNN và Naive
+Bayes có log loss cao dù accuracy không giảm theo cùng tỷ lệ, minh họa lý do không
+nên dùng accuracy làm tiêu chí duy nhất cho bài toán dự đoán xác suất.
+
+Hình~\ref{fig:folds} bổ sung điều mà giá trị trung bình che mất: thứ hạng này giữ
+nguyên ở cả năm fold, nhưng độ ổn định giữa các mô hình khác nhau rõ rệt. Bốn mô
+hình đầu có khoảng biến thiên hẹp (0.014--0.027 log loss giữa fold tốt nhất và
+tệ nhất), trong khi KNN trải 0.602--0.738 và Naive Bayes trải 1.880--2.431. Điểm
+số của hai mô hình sau vì thế phụ thuộc đáng kể vào việc rơi trúng fold nào, và
+đó là lý do phần suy diễn dùng kiểm định ghép cặp theo fold thay vì so trực tiếp
+hai giá trị trung bình.
+
+Về chi phí chạy, runtime theo fold cho thấy Decision Tree và Naive Bayes fit nhanh
+nhất; Logistic Regression cũng nhẹ. XGBoost fit trung bình khoảng 0.64 giây/fold,
+nhanh hơn Random Forest khoảng 1.19 giây/fold trong môi trường ghi nhận. Thời gian
+suy luận KNN không ổn định, với fold đầu là ngoại lệ lớn; do đó runtime chỉ nên
+được xem là mô tả cho lần chạy hiện tại, không phải benchmark phần cứng tổng quát.
+Thứ hạng trung bình vẫn cần được đọc cùng suy diễn ghép cặp ở Bảng~\ref{tab:stats}.
+
+\subsection{Suy diễn thống kê}
+
+\begin{table}[H]
+\centering\small
+\caption{So sánh chính của XGBoost. CI là t-based 95\% CI; kết luận dựa trên primary test.}
+\label{tab:stats}
+\begin{tabular}{lrrrrl}\toprule
+Comparator & $\bar d$ & CI 95\% & Shapiro p & p chỉnh & Kết luận\\\midrule
+Random Forest & -.0240 & [-.0287,-.0192] & .4627 & .00075 & XGB tốt hơn\\
+Logistic Regression & -.0586 & [-.0673,-.0498] & .0142 & .31250 & Chưa đủ bằng chứng\\
+Decision Tree & -.0923 & [-.1035,-.0812] & .5161 & .00011 & XGB tốt hơn\\
+KNN & -.2783 & [-.3496,-.2071] & .3438 & .00205 & XGB tốt hơn\\
+Naive Bayes & -1.8287 & [-2.0919,-1.5656] & .5702 & .00021 & XGB tốt hơn\\\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+\centering\includegraphics[width=\linewidth]{report/fig2_paired_ci_forest.png}
+\caption{Chênh lệch log loss theo fold giữa XGBoost và từng mô hình so sánh, kèm
+CI 95\% t-based. Điểm đặc là các so sánh đạt ngưỡng sau Bonferroni, điểm rỗng là
+Logistic Regression -- nơi CI nằm trọn bên trái vạch 0 nhưng primary test
+(Wilcoxon) không kết luận được. Naive Bayes nằm ngoài thang của hình, số đầy đủ ở
+Bảng~\ref{tab:stats}.}
+\label{fig:forest}
+\end{figure}
+
+Bảng~\ref{tab:stats} và Hình~\ref{fig:forest} trình bày cùng năm so sánh chính;
+bốn trong năm đạt ngưỡng đã hiệu chỉnh. Ngoại lệ là Logistic Regression,
+nơi Shapiro-Wilk bác bỏ giả định chuẩn nên primary test chuyển sang exact
+Wilcoxon; với $n=5$, p-value hai phía nhỏ nhất mà kiểm định này có thể trả về là
+.0625, đã vượt ngưỡng .01 trước khi nhìn dữ liệu. ``Chưa đủ bằng chứng'' vì vậy
+phản ánh giới hạn độ phân giải của thiết kế, không phải bằng chứng về sự tương
+đương. Khoảng tin cậy t-based của cả năm chênh lệch đều nằm dưới 0, nhưng ở riêng
+cặp này chúng chỉ là phân tích độ nhạy. Mọi kết luận còn bị giới hạn bởi việc các
+tập huấn luyện giữa năm fold chồng lấp nhau, nên năm chênh lệch không phải năm
+quan sát độc lập.
+
+\subsection{Calibration}
+
+XGBoost có top-label ECE 0.0117, macro classwise ECE 0.0085 và multiclass Brier
+score 0.2162 với 10 bins. ECE dao động 0.0117-0.0144 khi dùng 5-20 bins.
+
+\begin{figure}[H]
+\centering\includegraphics[width=.78\linewidth]{calibration/xgboost_reliability_diagram.png}
+\caption{Reliability diagram của XGBoost trên dự đoán out-of-fold có provenance hợp lệ.}
+\label{fig:calibration}
+\end{figure}
+
+Hình~\ref{fig:calibration} cho thấy đường reliability bám sát đường chéo lý tưởng
+ở vùng confidence cao. Trong bảy top-label bins có dữ liệu, accuracy quan sát luôn
+thấp hơn confidence, tức XGBoost overconfident theo một hướng nhất quán chứ không
+dao động ngẫu nhiên quanh đường chéo. Biên độ lệch nhỏ và tập trung ở vùng thưa
+dữ liệu: bin $[0.9,1.0)$ chứa 5.416 mẫu, tương đương 56.4\% quan sát, nhưng chỉ
+lệch 0.00006; ngược lại mọi khoảng lệch vượt 0.03 đều nằm ở bin có confidence dưới
+0.7, trong đó bin $[0.3,0.4)$ chỉ có 13 mẫu. Ba bin dưới 0.3 trống là hệ quả cấu trúc của bài toán ba lớp, vì xác
+suất lớn nhất luôn ít nhất bằng $1/3$.
+
+Classwise ECE lần lượt là 0.0119 cho C, 0.0038 cho CL và 0.0097 cho D. Giá trị
+thấp nhất thuộc về CL không được diễn giải là calibration tốt nhất. Lớp này chỉ có
+254 mẫu, và 94.5\% toàn bộ quan sát rơi vào bin xác suất CL $[0,0.1)$; ECE khi đó
+chủ yếu đo mức khớp giữa xác suất gần 0 và tần suất xuất hiện gần 0, một phép đo
+gần như luôn đạt với lớp hiếm bất kể mô hình có phân biệt được CL hay không. Phân
+tích chỉ đo calibration
+OOF; không fit Platt, isotonic hay temperature scaling, và không đưa ra kết luận
+về calibration trên test ẩn.
+
+\section{Ablation Study và phân tích bổ sung}
+
+\subsection{Ảnh hưởng của scaling}
+
+Hình~\ref{fig:scaling-ablation} đối chiếu hai biến thể dữ liệu có và không scaling
+trên cùng năm fold. Với KNN $k=51$, scaling giảm mean log loss từ 0.752 xuống
+0.660, đồng thời tăng accuracy từ 0.780 lên 0.814 và macro-F1 từ 0.477 lên 0.515.
+Logistic Regression hưởng lợi ít hơn: mean log loss giảm từ 0.483 xuống 0.441.
+Chênh lệch giữa hai mô hình phù hợp với cơ chế của chúng. Khoảng cách Euclid của
+KNN cộng trực tiếp bình phương sai lệch trên mọi chiều, nên một biến trải bốn bậc
+độ lớn có thể chi phối toàn bộ phép đo; Logistic Regression chỉ chịu ảnh hưởng
+gián tiếp qua điều kiện số của bài toán tối ưu và qua mức phạt L2 áp lên các hệ số
+có thang đo khác nhau.
+
+Số láng giềng có tác động lớn hơn scaling. KNN $k=5$ đạt mean log loss 2.448 khi
+scale và 3.055 khi không scale, tức cao gấp khoảng bốn lần $k=51$ trong cùng điều
+kiện. Xác suất ước lượng từ năm láng giềng chỉ nhận các bội của $1/5$, nên một
+quan sát bị phân loại sai sẽ nhận xác suất bằng 0 cho nhãn thực và bị log loss
+phạt không giới hạn.
+
+\begin{figure}[H]
+\centering\includegraphics[width=.82\linewidth]{model_track_a/knn_scaling_ablation.png}
+\caption{Ablation ảnh hưởng của scaling đối với KNN và Logistic Regression.}
+\label{fig:scaling-ablation}
+\end{figure}
+
+\subsection{Cây đơn và ensemble}
+
+Decision Tree không giới hạn độ sâu có OOF log loss 8.309: toàn bộ mẫu nhận xác
+suất cực đại trên 0.99 và 23.1\% mẫu có xác suất gán cho lớp đúng bằng đúng không.
+Giới hạn \texttt{max\_depth=3} giảm log loss xuống 0.474, Random Forest xuống
+0.406 và XGBoost xuống 0.382.
+
+Hình~\ref{fig:tree-ensemble} cho thấy hai đại lượng này \emph{không} biến thiên
+cùng chiều. Log loss giảm đơn điệu theo thứ tự trên, nhưng tỷ lệ mẫu có
+$p_{\max}>0.99$ lại đi 100\%, 0\%, 0.6\% rồi 7.7\%: XGBoost là mô hình tự tin
+nhất trong ba mô hình đã regularize, đồng thời cũng là mô hình tốt nhất. Mức độ
+tự tin vì vậy không phải biến giải thích.
+
+Biến phân biệt nằm ở xác suất nhỏ nhất từng gán cho lớp đúng. Cây không giới hạn
+độ sâu để giá trị này tụt xuống 0, và vì log loss không bị chặn trên tại đó, chỉ
+riêng 23.1\% số mẫu đủ đẩy toàn bộ chỉ số lên 8.309. Ba mô hình còn lại đều giữ
+một sàn dương: 0.0085 với cây độ sâu 3, 0.0032 với Random Forest và 0.0008 với
+XGBoost. Nói cách khác, regularization và ensemble không làm mô hình bớt tự tin
+mà làm nó \emph{không bao giờ chắc chắn một cách sai lầm tuyệt đối}, và đó mới
+là điều log loss thưởng. XGBoost được phép tự tin hơn vì độ tự tin đó có
+calibration tốt, như top-label ECE 0.0117 ở Mục~\ref{sec:results} xác nhận.
+
+\begin{figure}[H]
+\centering\includegraphics[width=.82\linewidth]{model_track_b/tree_vs_ensemble.png}
+\caption{So sánh log loss và mức độ tự tin của cây đơn với các ensemble cây.}
+\label{fig:tree-ensemble}
+\end{figure}
+
+\section{Thảo luận}
+
+\subsection{Trả lời các câu hỏi nghiên cứu}
+
+\textbf{RQ1.} H1 được xác nhận: XGBoost đạt mean 5-fold log loss thấp nhất
+($0.382\pm0.007$) đồng thời giữ accuracy và macro-F1 cao nhất. Vì không có đánh
+đổi giữa ba chỉ số, kết luận không phụ thuộc vào việc chọn metric nào làm tiêu chí.
+
+\textbf{RQ2.} H2 chỉ được ủng hộ một phần: sau Bonferroni, XGBoost tốt hơn bốn
+comparator, riêng Logistic Regression thì không. Như đã phân tích ở
+Mục~\ref{sec:results}, nguyên nhân nằm ở độ phân giải của thiết kế chứ không ở
+hiệu năng, nên protocol hiện tại không thể cho kết luận dương tính với cặp này dù
+chênh lệch thực có lớn đến đâu. Đây chính là ranh giới giữa hai câu hỏi thường bị
+gộp làm một: mô hình nào xếp hạng cao hơn, và chênh lệch có nhất quán qua fold hay
+không.
+
+\textbf{RQ3.} H3 được xác nhận ở cả hai vế. Scaling cải thiện cả hai mô hình
+Track A. Với cây, vế thứ hai đúng ở dạng đã phát biểu nhưng bác bỏ một cách diễn
+giải thường gặp. Log
+loss giảm đơn điệu từ 8.309 xuống 0.474, 0.406 và 0.382, song tỷ lệ mẫu có
+$p_{\max}>0.99$ không giảm theo: XGBoost tự tin hơn cả Random Forest lẫn cây độ
+sâu 3. Yếu tố quyết định là xác suất bằng 0 gán cho lớp đúng, vốn chỉ xuất hiện ở
+cây không giới hạn độ sâu. Ensemble không thắng nhờ bớt tự tin, mà nhờ không bao
+giờ sai một cách tuyệt đối.
+
+\textbf{RQ4.} Top-label ECE của XGBoost là 0.0117 và chỉ dao động trong khoảng
+0.0117-0.0144 khi số bin thay đổi từ 5 đến 20, nên kết luận ``calibration tốt''
+không phải hệ quả của một lựa chọn binning thuận lợi. H4 được ủng hộ ở mức tổng
+thể nhưng không ở mức từng lớp, vì chỉ số classwise của CL bị chi phối bởi tần
+suất lớp chứ không bởi độ tin cậy của dự đoán.
+
+\subsection{Đối chiếu với nghiên cứu trước}
+
+Kết quả nhất quán với ba nhận định trong tài liệu, nhưng ở những mức độ khác nhau.
+
+Thứ nhất, lợi thế của ensemble cây so với cây đơn trên dữ liệu bảng phù hợp với
+cơ chế mà Breiman mô tả \cite{breiman2001random} và với kết quả thực nghiệm của
+Chen và Guestrin \cite{chen2016xgboost}. Tuy nhiên, biên độ ở đây khiêm tốn: log
+loss chỉ giảm 0.024 từ Random Forest sang XGBoost, nhỏ hơn nhiều so với khoảng
+cách giữa bất kỳ ensemble nào với cây không regularization.
+
+Thứ hai, nhận định của Guo và cộng sự rằng hiệu năng phân loại và calibration là
+hai khía cạnh tách biệt \cite{guo2017calibration} được tái hiện theo chiều ngược
+với công trình gốc. Guo quan sát mạng nơ-ron hiện đại \emph{overconfident nghiêm
+trọng}; XGBoost ở đây chỉ overconfident nhẹ và nhất quán (ECE 0.0117), nên
+temperature scaling nhiều khả năng mang lại cải thiện biên. Trường hợp minh họa
+rõ nguyên tắc đó lại là Naive Bayes: accuracy 0.589 nhưng log loss 2.211, tức
+xác suất sai lệch nghiêm trọng mà xếp hạng lớp không phản ánh.
+
+Thứ ba, cảnh báo của Demšar về so sánh bội \cite{demsar2006statistical} tỏ ra
+đúng nhưng theo hướng bảo thủ hơn dự kiến. Demšar khuyến nghị Wilcoxon cho so
+sánh trên \emph{nhiều dataset}; ở đây chỉ có một dataset và năm fold phụ thuộc
+nhau, nên năm chênh lệch không phải năm quan sát độc lập. Vì vậy các p-value
+trong Bảng~\ref{tab:stats} nên được đọc như chỉ báo về tính nhất quán qua fold,
+không phải như kiểm định về khả năng khái quát sang quần thể bệnh nhân khác.
+
+\section{Phân tích lỗi và hạn chế}
+
+\subsection{Hai chế độ lỗi}
+
+Lỗi của các mô hình tập trung vào hai chế độ khác nhau về bản chất.
+
+Chế độ thứ nhất gắn với lớp hiếm. Lớp CL chỉ có 254 mẫu, tương đương 50 hoặc 51
+mẫu mỗi validation fold, nên mọi ước lượng riêng cho lớp này đều có độ bất định
+cao; đó là lý do macro-F1 thấp hơn accuracy ở mọi mô hình và là lý do không nên
+đọc classwise ECE của CL như bằng chứng về độ tin cậy.
+
+Chế độ thứ hai gắn với xác suất cực đoan và không bị accuracy phát hiện. Decision
+Tree không giới hạn độ sâu vẫn đạt accuracy 0.769, gần bằng các mô hình đứng đầu,
+nhưng log loss lên tới 8.309 do 23.1\% quan sát nhận xác suất bằng 0 cho lớp đúng.
+KNN với $k$ nhỏ mắc cùng lỗi này vì cùng nguyên nhân, còn Naive Bayes đạt log loss
+2.211 do giả định độc lập Gaussian tạo likelihood quá tự tin trên các xét nghiệm
+có tương quan. Cả ba trường hợp cho thấy một mô hình có thể xếp đúng lớp mà vẫn
+ước lượng xác suất sai nghiêm trọng.
+
+Về khả năng quy trách nhiệm cho từng lỗi, các track đã tạo confusion matrix OOF và
+feature importance, trong đó Bilirubin, Prothrombin Time, Copper, Albumin và tỷ lệ
+Bilirubin/Albumin thường xếp cao. Tuy nhiên importance chỉ đo mức độ mô hình sử
+dụng biến, không chứng minh quan hệ nhân quả. Nghiên cứu vì vậy không gán nguyên
+nhân lâm sàng cho bất kỳ dự đoán sai nào.
+
+\subsection{Hạn chế nghiên cứu}
+
+Ba giới hạn có thể làm score và p-value lạc quan hơn thực tế. Median, encoder và
+scaler được fit trên toàn bộ train trước cross-validation nên thống kê của phần
+validation đi vào tiền xử lý. Việc tuning và đánh giá dùng chung một bộ fold thay
+vì nested CV tạo selection bias. Protocol được chốt sau khi đã có kết quả sơ bộ,
+nên đây không phải nghiên cứu tiền đăng ký.
+
+Hai giới hạn còn lại thu hẹp phạm vi kết luận. Với $n=5$, Shapiro-Wilk có power
+thấp và Wilcoxon có p-value rời rạc, nên suy diễn thống kê chỉ đo tính nhất quán
+qua fold. Runtime được ghi trên một môi trường không lưu cấu hình phần cứng, nên
+chỉ mô tả lần chạy hiện tại. Toàn bộ kết luận dựa trên validation nội bộ và không
+chứng minh hiệu quả lâm sàng hay khả năng khái quát sang quần thể bệnh nhân khác.
+
+\section{Tái lập kết quả}
+\label{sec:repro}
+
+Mã nguồn được lưu tại
+\href{https://github.com/AIVIETNAM-AIO-DoHongNhat/Hepatic-Model-Comparison}{GitHub
+Hepatic-Model-Comparison}. Seed chung là 42. Môi trường authoritative được pin
+trong \texttt{requirements.lock.txt}; \texttt{requirements.txt} chỉ nêu lower bound
+nên không thay thế được bản ghi provenance.
+
+\begin{aivnoutputbox}[Cài đặt môi trường]
+git clone https://github.com/AIVIETNAM-AIO-DoHongNhat/Hepatic-Model-Comparison.git
+cd Hepatic-Model-Comparison
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+\end{aivnoutputbox}
+
+Dữ liệu cuộc thi được đặt trong \texttt{data/raw/}. Người tái lập chạy notebook
+theo thứ tự: 01 EDA, 02 preprocessing, 03 baseline, 04-06 ba model tracks, 07
+report assets và 08 statistics. Notebook 02 tạo dữ liệu processed và fold ID;
+04-06 tạo score/model/figure; 07-08 tạo bảng báo cáo, inference và calibration.
+
+\begin{aivnoutputbox}[Kiểm tra artifact không ghi đè dữ liệu]
+python scripts/reproduce_all.py --project-root .
+python scripts/run_final_analysis.py scores --project-root .
+python scripts/run_final_analysis.py inference --project-root .
+python scripts/run_final_analysis.py calibration --project-root .
+\end{aivnoutputbox}
+
+Chế độ mặc định chỉ đọc: kiểm tra môi trường, hash đầu vào, bảng score, OOF, cổng
+tái tạo và calibration. Chế độ \texttt{-{}-full} chạy lại notebook 02-06 rồi so
+artifact mới với bản trước, nên chỉ dùng trên clone sạch. Nếu môi trường không
+khớp các phiên bản đã pin, việc kiểm tra dừng lại là hành vi mong đợi.
+
+Cấu hình siêu tham số đầy đủ của sáu mô hình xem Bảng~\ref{tab:hyperparams}
+(Phụ lục~\ref{app:config}); phân công xác nhận nội dung xem Bảng~\ref{tab:owner}
+(Phụ lục~\ref{app:owner}).
+
+\noindent\textbf{Kết quả kiểm chứng tái lập}
+
+Cơ chế trên đã được áp dụng và cho ba kết quả đáng ghi nhận, trình bày ở đây vì
+chúng định lượng mức độ đáng tin của các con số trong báo cáo.
+
+\textbf{Cổng tái tạo OOF đạt gần như bit-for-bit.} Chạy lại toàn bộ quy trình
+XGBoost trong môi trường đã pin tái tạo \texttt{scores\_track\_c.csv} với sai lệch
+metric lớn nhất $5.55\times10^{-17}$, đạt 5/5 fold ở dung sai $10^{-5}$. Trong 15
+ô metric, 14 ô khớp chính xác từng bit; ô còn lại lệch đúng một đơn vị cuối của
+kiểu \texttt{double}. Nhờ cổng này, dự đoán out-of-fold dùng cho phân tích
+calibration ở Mục~\ref{sec:results} được xác nhận là cùng một artifact đã sinh ra
+bảng điểm, không phải một lần chạy lại xấp xỉ.
+
+\textbf{Nguyên nhân sai lệch là môi trường, không phải mã nguồn.} Trước khi môi
+trường được pin, cùng mã và cùng dữ liệu chạy trên Python 3.13.3 với XGBoost 3.3.0
+cho 0/5 fold đạt cổng, chênh lệch metric tối đa 0.0169 - lớn hơn cả chênh lệch
+log loss 0.024 giữa XGBoost và Random Forest. Nói cách khác, nếu không kiểm soát
+môi trường thì riêng phiên bản thư viện đã đủ tạo ra sai lệch cùng bậc độ lớn với
+hiệu ứng mà nghiên cứu muốn đo. Kết quả cũ này được giữ lại trong
+\texttt{results/diagnostics/} và đánh dấu đã bị thay thế.
+
+\textbf{Có một giới hạn tái lập không khắc phục được ở tầng phần mềm.} Khi chạy
+lại toàn bộ notebook, Track A và Track B tái tạo giống hệt từng byte, nhưng log
+loss của Random Forest ở fold 3 lệch $1.11\times10^{-16}$. Nguyên nhân là
+\texttt{n\_jobs=-1} khiến 600 cây được cộng theo thứ tự luồng do hệ điều hành
+quyết định, mà phép cộng dấu phẩy động không có tính kết hợp. Đây là đặc tính của
+phần cứng chứ không phải lỗi pipeline; mức lệch nhỏ hơn dung sai cổng khoảng 11
+bậc độ lớn nên không ảnh hưởng kết luận nào. Vì vậy quy trình kiểm tra so sánh
+\emph{theo giá trị} với ngưỡng $10^{-12}$ thay vì so từng byte.
+
+Bài học phương pháp luận rút ra là notebook chỉ lưu tên kernel chứ không lưu
+phiên bản thư viện, và khoảng trống đó từng bị chẩn đoán nhầm thành mất provenance.
+Nguyên tắc áp dụng cho mọi artifact số về sau: chốt môi trường trước, rồi mới điều
+tra chênh lệch số.
+
+\section{Kết luận và hướng phát triển}
+
+Trong phạm vi dữ liệu và protocol hiện tại, XGBoost là mô hình tốt nhất trong sáu
+ứng viên nhờ log loss thấp nhất, macro-F1 cao nhất và calibration OOF tốt. Giá trị
+chính của nghiên cứu không chỉ nằm ở mô hình thắng mà còn ở quy trình so sánh dùng
+chung fold, kiểm định có hiệu chỉnh và kiểm tra calibration - nhờ đó phân biệt
+được đâu là chênh lệch nhất quán qua fold và đâu là chênh lệch mà thiết kế hiện
+tại chưa đủ độ phân giải để kết luận. Kết luận này chỉ áp dụng cho đánh giá nội bộ
+hiện có và cần được cập nhật khi có đánh giá ngoài mẫu độc lập.
+
+Ba hướng ưu tiên là: (1) repeated hoặc nested stratified cross-validation để tách
+tuning khỏi đánh giá và tăng độ ổn định; (2) đánh giá calibration theo từng lớp,
+thử temperature/vector scaling trên một calibration split độc lập, đồng thời theo
+dõi riêng lớp CL; (3) thử blending xác suất giữa XGBoost và Logistic Regression
+theo trọng số được chọn hoàn toàn trong validation. Các thử nghiệm mới phải chốt
+protocol trước khi xem kết quả và ghi đầy đủ provenance.
+
+\newpage
+% Từ đây trở đi (tài liệu tham khảo + phụ lục) không đánh số trang nữa.
+% \pagestyle đổi từ trang KẾ TIẾP, nên cần thêm \thispagestyle cho chính trang này.
+\pagestyle{khongsotrang}
+\thispagestyle{khongsotrang}
+\section{Tài liệu tham khảo}
+\vspace{-3.2em}
+\printbibliography
+
+\begin{appendices}
+\section{Thông tin bổ sung}
+\begin{enumerate}
+\item \textbf{AI VIET NAM:} Thông tin chương trình tại
+\href{https://aivietnam.edu.vn/}{aivietnam.edu.vn}.
+\item \textbf{GitHub Repository:}
+\href{https://github.com/AIVIETNAM-AIO-DoHongNhat/Hepatic-Model-Comparison}{Hepatic-Model-Comparison}.
+\item \textbf{Dataset:} CSV cuộc thi được đặt trong \texttt{data/raw/}; benchmark
+UCI liên quan được trích dẫn trong Related Work. Việc phân phối lại dữ liệu phải
+tuân theo quy định của ban tổ chức.
+\item \textbf{Model Checkpoints:} Sáu model đã fit được lưu trong
+\texttt{results/models/}. Kết quả chính dựa trên CV/OOF, không dựa vào một checkpoint
+đơn lẻ.
+\item \textbf{Experiment Logs:} Điểm từng fold và runtime nằm trong thư mục
+\texttt{results/}: một bảng tổng hợp, ba bảng theo track và một bảng runtime.
+\item \textbf{Supplementary Results:} Hình trong \texttt{figures/}, bảng trong
+\texttt{tables/}, OOF và manifest trong \texttt{results/oof/}.
+\item \textbf{Presentation:} Slide hoặc video trình bày chưa được lưu trong repo
+tại thời điểm khóa bản báo cáo này.
+\end{enumerate}
+
+\section{Cấu hình thí nghiệm đầy đủ}
+\label{app:config}
+
+Mọi mô hình dùng seed 42 và được fit lại từ đầu trên từng training fold. Cột
+``Quét'' ghi không gian tìm kiếm; cột ``Chốt'' ghi cấu hình đã freeze trước khi
+hợp nhất bảng điểm. Các tham số không liệt kê giữ mặc định của thư viện.
+
+\begin{table}[H]\centering\small
+\caption{Không gian siêu tham số và cấu hình cuối của sáu mô hình.}
+\label{tab:hyperparams}
+\begin{tabularx}{\linewidth}{lXX}\toprule
+Mô hình & Quét & Chốt\\\midrule
+KNN & \texttt{n\_neighbors} $\in\{3,5,7,9,11,15,21,31,41,51\}$
+    & $k=51$; uniform weights; Minkowski $p=2$\\
+Logistic Regression & không quét
+    & L2, $C=1$, \texttt{lbfgs}, \texttt{max\_iter}=1000\\
+Decision Tree & \texttt{max\_depth} $\in\{2,3,4,5,6,8,10,12,15,20,\mathrm{None}\}$
+    & \texttt{max\_depth}=3; Gini; \texttt{min\_samples\_leaf}=1\\
+Naive Bayes & không quét
+    & \texttt{GaussianNB}, \texttt{var\_smoothing}=$10^{-9}$\\
+Random Forest & \texttt{n\_estimators} $\in\{200,400,600\}$;
+                \texttt{max\_depth} $\in\{6,8,10,14,\mathrm{None}\}$
+    & 600 cây, \texttt{max\_depth}=14, \texttt{n\_jobs}=$-1$\\
+XGBoost & \texttt{n\_estimators} $\in\{200,400\}$; \texttt{max\_depth} $2$-$6$;
+          \texttt{learning\_rate} $\in\{0.03,0.05,0.10,0.15,0.20\}$
+    & 400 cây, \texttt{max\_depth}=2, \texttt{lr}=0.15,
+      \texttt{eval\_metric}=\texttt{mlogloss}\\\bottomrule
+\end{tabularx}\end{table}
+
+Môi trường authoritative (\texttt{requirements.lock.txt}): Python 3.9.18,
+scikit-learn 1.6.1, XGBoost 2.1.4, NumPy 1.26.4, pandas 2.3.3, SciPy 1.13.1,
+Matplotlib 3.9.2. Notebook không ghi model CPU, RAM hay GPU, nên runtime trong
+Mục~\ref{sec:results} chỉ mô tả lần chạy hiện tại.
+
+\section{Nguồn artifact}
+\begin{itemize}
+\item Hiệu năng: \texttt{results/scores\_all.csv}, \texttt{tables/report\_model\_comparison.csv}.
+\item Kiểm định: \texttt{tables/report\_significance.csv}, \texttt{tables/assumption\_checks.csv}.
+\item Calibration: \texttt{results/oof/}; trong \texttt{tables/} có
+\texttt{calibration\_metrics.csv} và \texttt{calibration\allowbreak\_ece\allowbreak\_bin\allowbreak\_sensitivity.csv}.
+\item Ablation: trong \texttt{tables/} có \texttt{knn\allowbreak\_scaling\allowbreak\_ablation.csv} và
+\texttt{tree\_vs\_ensemble.csv}.
+\item Provenance: \texttt{requirements.lock.txt}; trong \texttt{results/oof/} có
+manifest, cổng tái tạo và metric từng fold; bản chẩn đoán đã bị thay thế nằm
+trong \texttt{results/diagnostics/}.
+\end{itemize}
+
+\section{Phân công xác nhận nội dung}
+\label{app:owner}
+
+\begin{table}[H]\centering
+\caption{Người chịu trách nhiệm xác nhận từng phần nội dung khoa học.}
+\label{tab:owner}
+\begin{tabularx}{\linewidth}{lX}\toprule
+Thành viên & Phần xác nhận cuối\\\midrule
+Trương Trung Tín & Dữ liệu, tiền xử lý, folds, Random Forest, XGBoost\\
+Lê Đức Tùng Dương & KNN, Logistic Regression, ablation scaling\\
+Đỗ Hồng Nhất & Decision Tree, Naive Bayes, cây đơn-ensemble\\
+Đinh Văn Anh Khôi & Kiểm định, khoảng tin cậy, hiệu chỉnh, calibration\\
+Nguyễn Thị Cẩm Vân & Hình, bảng, tích hợp báo cáo và kiểm soát chất lượng\\\bottomrule
+\end{tabularx}\end{table}
+\end{appendices}
+
+\end{document}
