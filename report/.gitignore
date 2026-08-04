@@ -1,0 +1,15 @@
+# File trung gian do LaTeX/biber sinh ra khi biên dịch — không commit.
+# Chỉ commit nguồn (.tex, template/) và bản xuất cuối (.pdf).
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.listing
+*.log
+*.out
+*.run.xml
+*.synctex.gz
+*.toc
+*-blx.bib

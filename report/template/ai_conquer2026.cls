@@ -73,7 +73,10 @@
 % IV. BIBLIOGRAPHY & APPENDIX
 % =========================================================
 \RequirePackage[
-    backend=bibtex,
+    % biber thay cho bibtex: bibtex chỉ là backend dự phòng của biblatex 3.21
+    % ("Using fall-back bibtex backend"), gây cảnh báo "Please (re)run BibTeX"
+    % không bao giờ hết dù .bbl đã đúng. Với biber thì build sạch, PDF không đổi.
+    backend=biber,
     style=ieee,
     maxnames=1,
     minnames=1,
@@ -271,7 +274,7 @@
 % =========================================================
 \newcounter{mycounter}
 \newcommand\showmycounter{\stepcounter{mycounter}\themycounter}
-\newcounter{hinh}
+% Bỏ \newcounter{hinh} lặp: counter này đã khai báo ở dòng 213 cùng \capfig.
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \DeclareMathOperator*{\argmin}{arg\,min}
