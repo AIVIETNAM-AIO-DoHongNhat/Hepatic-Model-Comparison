@@ -51,9 +51,15 @@
 \renewcommand{\headrule}{{\color{aivnGreen}\hrule width\headwidth height\headrulewidth \vskip-\headrulewidth}}
 
 \begin{document}
-% Phần đầu (bìa, tóm tắt, mục lục) đánh số i, ii để thân báo cáo bắt đầu lại từ
-% trang 1 ngay sau mục lục.
-\pagenumbering{roman}
+% Phần đầu (bìa, tóm tắt, mục lục) KHÔNG đánh số trang. Dùng \pagenumbering thay
+% vì \pagestyle: gobble làm \thepage rỗng nên mọi page style đều không in số -
+% kể cả plain, thứ mà \maketitle và \tableofcontents tự đặt cho trang đầu của
+% chúng và sẽ ghi đè mọi \pagestyle đặt ở đây. Bộ đếm vẫn chạy ngầm.
+\pagenumbering{gobble}
+% Bộ đếm phần đầu chạy 1..4 rồi thân báo cáo reset về 1, nên hyperref sẽ tạo hai
+% anchor cùng tên page.1..page.4. Tắt page anchor ở phần đầu (không có mục lục
+% nào trỏ tới các trang này) rồi bật lại từ thân báo cáo.
+\hypersetup{pageanchor=false}
 \maketitle
 \vspace{-5.5em}
 \setlength{\epigraphwidth}{0.6\textwidth}
@@ -101,8 +107,11 @@ phiên bản thư viện đã gây sai lệch cùng bậc độ lớn với hi�
 \tableofcontents
 \thispagestyle{fancy}
 \newpage
-% Thân báo cáo bắt đầu đánh số lại từ 1.
+% Thân báo cáo (mục I đến XI) là phần DUY NHẤT được đánh số trang: arabic vừa bật
+% lại \thepage vừa reset bộ đếm, nên trang đầu mục I là trang 1. Tài liệu tham
+% khảo và phụ lục tắt số trở lại bằng \pagestyle{khongsotrang} ở cuối file.
 \pagenumbering{arabic}
+\hypersetup{pageanchor=true}
 
 \section{Giới thiệu}
 
