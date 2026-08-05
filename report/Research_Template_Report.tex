@@ -124,29 +124,6 @@ không chỉ là một nhãn, vì hệ thống chấm bằng multiclass log loss
 cao tốn kém hơn nhiều bậc so với sai nhưng vẫn thể hiện độ bất định. Nghiên cứu vì
 vậy phải xem xét đồng thời khả năng phân loại, chất lượng xác suất và calibration.
 
-Bộ dữ liệu tồn tại những khó khăn, tác động trực tiếp đến lựa chọn tiền xử lý lẫn tiêu chí đánh giá:
-
-\begin{itemize}
-\item \textbf{Nhãn mất cân bằng nghiêm trọng, tỉ lệ xấp xỉ 26:1.} Lớp C
-chiếm 67.9\%, D chiếm 29.4\%, còn CL chỉ 2.6\%. Với phân bố này, một mô
-hình chỉ cần dự đoán thiên về lớp đa số đã đạt accuracy cao trong khi
-gần như bỏ qua hoàn toàn lớp hiếm. Accuracy vì vậy không còn là thước đo
-đáng tin, cần chuyển sang macro-F1 hoặc balanced accuracy.
-
-\item \textbf{Dữ liệu thiếu ở mức cao.} Nhiều biến có tỉ lệ khuyết đáng
-kể, nặng nhất là \texttt{Edema\_Status} với hơn 92\%. Ở ngưỡng này,
-việc điền khuyết gần như đồng nghĩa với sinh dữ liệu giả, nên bài toán
-đặt ra là cân nhắc giữa loại bỏ biến và giữ lại kèm cờ đánh dấu giá trị
-thiếu.
-
-\item \textbf{Miền giá trị giữa các biến chênh nhau tới bốn bậc độ lớn,
-kèm phân phối lệch phải.} Albumin dao động trong khoảng 1.94 -- 4.67,
-trong khi Alkaline Phosphatase trải từ 8.1 đến 19.053. Nếu không chuẩn
-hóa, các biến có miền giá trị lớn sẽ lấn át cả khoảng cách lẫn số hạng
-phạt, khiến những mô hình dựa trên khoảng cách hoặc có regularization
-bị lệch nghiêm trọng.
-\end{itemize}
-
 Chỉ xếp hạng các mô hình theo điểm trung bình là chưa đủ. Khoảng cách điểm giữa
 chúng có thể chỉ đến từ một cách chia train-validation nhất định. Ngoài ra, khi
 đem cùng một bộ dữ liệu ra so sánh nhiều lần, càng so sánh nhiều thì càng dễ gặp
@@ -265,21 +242,29 @@ chuỗi thời gian, nên thêm mạng sâu chỉ làm phình không gian thử 
 \subsection{Đánh giá xác suất và so sánh thống kê}
 \label{rw:probstat}
 
-Accuracy chỉ nhìn vào lớp có xác suất lớn nhất, nên không phân biệt được một dự
-đoán đúng với độ tự tin 0.51 hay 0.99. Log loss và Brier score
-\cite{brier1950verification} chấm trên toàn bộ phân phối xác suất, còn reliability
-diagram và ECE đo khoảng cách giữa độ tự tin của mô hình và tỷ lệ đúng thực tế.
-Guo và cộng sự cho thấy một mô hình có accuracy tốt vẫn có thể hiệu chuẩn kém, và
-temperature scaling là cách hậu xử lý đơn giản mà hiệu quả \cite{guo2017calibration}.
-Công trình đó làm trên mạng nơ-ron, nhưng ý chính - xếp đúng lớp và cho xác suất
-đáng tin là hai chuyện khác nhau - vẫn đúng ở đây.
+Vì hệ thống chấm bằng log loss, phần đánh giá phải trả lời hai câu hỏi tách rời
+nhau: xác suất mô hình đưa ra có đáng tin không, và chênh lệch giữa các mô hình có
+thật không. Bốn điểm dưới đây là cơ sở cho hai câu hỏi đó:
 
-So sánh nhiều mô hình mà không hiệu chỉnh thì rất dễ kết luận nhầm là có khác biệt.
-Demšar khuyến nghị dùng kiểm định phi tham số như Wilcoxon và cảnh báo về việc so
-sánh quá nhiều lần \cite{demsar2006statistical}. Nghiên cứu này theo đúng hai
-nguyên tắc đó: kiểm định ghép cặp và hiệu chỉnh cho nhiều phép so sánh. Điểm khác
-là ở đây chỉ có năm fold trên một bộ dữ liệu, mà năm fold thì không phải năm bộ dữ
-liệu độc lập.
+\begin{itemize}
+  \item \textbf{Log loss và Brier score} \cite{brier1950verification} chấm trên
+        toàn bộ phân phối xác suất. Accuracy chỉ nhìn lớp thắng nên không phân biệt
+        được một dự đoán đúng ở mức tự tin 0.51 với 0.99.
+  \item \textbf{Reliability diagram và ECE} đo trực tiếp khoảng cách giữa độ tự tin
+        của mô hình và tỷ lệ đúng thực tế. Đây là phần mà log loss gộp chung vào một con
+        số duy nhất.
+  \item \textbf{Kết quả của Guo và cộng sự} - accuracy cao không kéo theo xác suất
+        đáng tin \cite{guo2017calibration}. Kết luận này rút ra trên mạng nơ-ron,
+        nhưng sự tách rời giữa xếp đúng lớp và hiệu chuẩn tốt không gắn riêng với
+        họ mô hình nào, nên mô hình dẫn đầu về log loss vẫn phải đo hiệu chuẩn
+        bằng một chỉ số riêng.
+  \item \textbf{Khuyến nghị của Demšar} - so sánh ghép cặp bằng kiểm định phi tham
+        số, và hiệu chỉnh khi số phép so sánh tăng lên, vì càng so sánh nhiều thì
+        càng dễ gặp một khác biệt giả \cite{demsar2006statistical}.
+\end{itemize}
+
+Hai điểm đầu quy định cách đo, hai điểm sau quy định cách kết luận; cả bốn được cụ
+thể hoá ở Mục~\ref{sec:stat}.
 
 \subsection{Khoảng trống và định vị nghiên cứu}
 
@@ -508,6 +493,7 @@ khi chốt tham số, cả hai được chạy lại trên cùng năm fold để
 và dự đoán out-of-fold.
 
 \subsection{Phân tích thống kê và calibration}
+\label{sec:stat}
 
 XGBoost được chọn làm mô hình tham chiếu vì có log loss trung bình thấp nhất. Với
 mỗi mô hình đối chứng, quy trình chạy đúng bốn bước:
@@ -555,13 +541,30 @@ Trong train, C có 6.521 mẫu (67.93\%), D có 2.825 mẫu (29.43\%) và CL có
 \label{fig:eda}
 \end{figure}
 
-Hình~\ref{fig:eda} tổng hợp ba đặc điểm chi phối thiết kế thí nghiệm: quy mô dữ
-liệu, mức mất cân bằng nhãn và tỷ lệ thiếu theo biến. \texttt{Edema\_Status} thiếu
-92.01\%, Triglyceride và Cholesterol thiếu 55.66\% và 55.35\%, nhiều biến điều
-trị, dấu hiệu và xét nghiệm thiếu khoảng 43\%. Đây là căn cứ cho ba cách xử lý
-thiếu ở Mục~\ref{sec:pipeline}. Bilirubin, Alkaline Phosphatase, Copper,
-Cholesterol và vài xét nghiệm khác lệch phải rõ, trung bình lớn hơn trung vị, nên
-được \texttt{log1p}. Histogram của tám biến chính cho thấy train và test phân bố
+Hình~\ref{fig:eda} tổng hợp ba đặc điểm của bộ dữ liệu, mỗi đặc điểm ràng buộc
+trực tiếp một lựa chọn trong tiền xử lý hoặc tiêu chí đánh giá:
+
+\begin{itemize}
+  \item \textbf{Nhãn mất cân bằng nghiêm trọng, tỉ lệ C:CL xấp xỉ 26:1.} Với phân
+        bố này, một mô hình chỉ cần dự đoán thiên về lớp đa số đã đạt accuracy cao
+        trong khi gần như bỏ qua hoàn toàn lớp hiếm, nên accuracy không còn là
+        thước đo đáng tin và mọi bảng điểm đều phải báo cáo kèm macro-F1.
+  \item \textbf{Dữ liệu thiếu ở mức cao.} \texttt{Edema\_Status} thiếu 92.01\%,
+        Triglyceride và Cholesterol thiếu 55.66\% và 55.35\%, nhiều biến điều trị,
+        dấu hiệu và xét nghiệm thiếu khoảng 43\%. Ở ngưỡng 92\%, điền khuyết gần
+        như đồng nghĩa với sinh dữ liệu giả, nên phải cân nhắc giữa loại bỏ biến và
+        giữ lại kèm cờ đánh dấu giá trị thiếu - căn cứ cho ba cách xử lý thiếu ở
+        Mục~\ref{sec:pipeline}.
+  \item \textbf{Miền giá trị chênh nhau tới bốn bậc độ lớn, kèm phân phối lệch
+        phải.} Albumin dao động trong khoảng 1.94 -- 4.67, trong khi Alkaline
+        Phosphatase trải từ 8.1 đến 19.053; Bilirubin, Copper, Cholesterol và vài
+        xét nghiệm khác có trung bình lớn hơn trung vị nên được \texttt{log1p}. Nếu
+        không chuẩn hoá, các biến có miền giá trị lớn sẽ lấn át cả khoảng cách lẫn
+        số hạng phạt, khiến những mô hình dựa trên khoảng cách hoặc có
+        regularization bị lệch nghiêm trọng.
+\end{itemize}
+
+Histogram của tám biến chính cho thấy train và test phân bố
 khá giống nhau, nhưng đây chỉ là quan sát bằng mắt: nghiên cứu không chạy kiểm
 định nào để đo mức lệch phân phối, nên không kết luận hai bên giống nhau.
 
@@ -803,14 +806,14 @@ trên nhóm bệnh nhân khác.
 
 \subsection{Phân tích lỗi}
 
-Lỗi của các mô hình rơi vào hai kiểu khác hẳn nhau:
+Lỗi của các mô hình rơi vào hai lỗi khác hẳn nhau:
 
 \begin{itemize}
-\item \textbf{Kiểu 1 - lớp hiếm.} CL chỉ có 254 mẫu, tức 50-51 mẫu mỗi fold đánh
+\item \textbf{Lớp hiếm.} CL chỉ có 254 mẫu, tức 50-51 mẫu mỗi fold đánh
 giá, nên mọi ước lượng riêng cho lớp này đều rất kém chắc chắn. Đó là lý do
 macro-F1 thấp hơn accuracy ở mọi mô hình, và cũng là lý do không thể đọc classwise
 ECE của CL như bằng chứng về độ tin cậy (Mục~\ref{sec:calib}).
-\item \textbf{Kiểu 2 - xác suất cực đoan mà accuracy không phát hiện được.}
+\item \textbf{Xác suất cực đoan mà accuracy không phát hiện được.}
 Decision Tree không giới hạn độ sâu vẫn đạt accuracy 0.769, gần bằng nhóm dẫn đầu,
 nhưng log loss lên tới 8.309. KNN với $k$ nhỏ mắc đúng lỗi này. Naive Bayes có log
 loss 2.211 vì giả định các biến độc lập khiến nó quá tự tin trên những xét nghiệm
@@ -1015,10 +1018,10 @@ bản chẩn đoán cũ đã bị thay thế nằm trong
 \label{app:owner}
 
 \begin{table}[H]\centering
-\caption{Người chịu trách nhiệm xác nhận từng phần nội dung khoa học.}
+\caption{Bảng phân công công việc nhóm}
 \label{tab:owner}
 \begin{tabularx}{\linewidth}{lX}\toprule
-Thành viên & Phần xác nhận cuối\\\midrule
+Thành viên & Nhiệm vụ\\\midrule
 Trương Trung Tín & Dữ liệu, tiền xử lý, folds, Random Forest, XGBoost\\
 Lê Đức Tùng Dương & KNN, Logistic Regression, ablation scaling\\
 Đỗ Hồng Nhất & Decision Tree, Naive Bayes, cây đơn-ensemble\\

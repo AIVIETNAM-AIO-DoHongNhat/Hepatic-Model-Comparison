@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(initexmf --show-config-value=[MPM]AutoInstall; \\(Get-Command latexmk -ErrorAction SilentlyContinue\\).Source; \\(Get-Command perl -ErrorAction SilentlyContinue\\).Source)"
+    ]
+  }
+}
